@@ -1,37 +1,66 @@
 @echo off
-REM Math Club Website - Quick Start Script
+setlocal enabledelayedexpansion
+title Math Club Website - Setup & Start
+
+color 0A
+cls
+
 echo.
 echo ========================================
-echo  Math Club Website Setup ^& Start
+echo  MATH CLUB WEBSITE - SETUP ^& START
 echo ========================================
 echo.
 
-REM Check if .env.local exists
-if not exist ".env.local" (
-    echo Creating .env.local from .env.example...
-    copy .env.example .env.local
-    echo.
-    echo WARNING: Edit .env.local with your Supabase credentials!
-    echo.
+REM Check Node.js
+where node >nul 2>nul
+if errorlevel 1 (
+    echo ERROR: Node.js is not installed
+    echo Install from: https://nodejs.org/
     pause
+    exit /b 1
+)
+echo [OK] Node.js installed
+
+REM Create environment file
+if not exist ".env.local" (
+    echo Creating .env.local...
+    (
+        echo DB_USER=postgres
+        echo DB_PASSWORD=postgres
+        echo DB_HOST=localhost
+        echo DB_PORT=5432
+        echo DB_NAME=math_club
+        echo JWT_SECRET=your-secret-key-change-in-production
+        echo NEXT_PUBLIC_SUPABASE_URL=your-url
+        echo NEXT_PUBLIC_SUPABASE_ANON_KEY=your-key
+        echo NODE_ENV=development
+    ) > .env.local
+    echo [OK] .env.local created
 )
 
-REM Check if node_modules exists
-if not exist "node_modules" (
-    echo Installing dependencies...
-    call bun install
-    if errorlevel 1 (
-        echo Installation failed!
-        pause
-        exit /b 1
-    )
+REM Install dependencies
+echo Installing npm packages...
+call npm install --legacy-peer-deps
+if errorlevel 1 (
+    echo ERROR: npm install failed
+    pause
+    exit /b 1
 )
+echo [OK] npm packages installed
 
-REM Start dev server
 echo.
-echo Starting development server...
-echo Open: http://localhost:3000
-echo Press Ctrl+C to stop
+echo ========================================
+echo  STARTING DEVELOPMENT SERVER
+echo ========================================
+echo.
+echo Website: http://localhost:3000
+echo.
+echo Demo Credentials:
+echo   Student ID: student_001, Password: password123
+echo   Admin ID: admin_001, Password: password123
+echo.
+echo Press Ctrl+C to stop the server
 echo.
 
-call bun run dev
+REM Start the development server
+call npm run dev

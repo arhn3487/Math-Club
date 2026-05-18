@@ -313,3 +313,75 @@ export interface Demerit {
   demerit_point?: number
   reason?: string
 }
+
+// ==================== AUTHENTICATION & SIGNUP TYPES ====================
+
+// Login/Register Response
+export interface AuthResponse {
+  success: boolean
+  message: string
+  token?: string
+  user?: AuthUser
+  error?: string
+}
+
+// Authenticated User
+export interface AuthUser {
+  id: string
+  user_id: string
+  full_name: string
+  email: string
+  user_type: 'student' | 'admin' | 'pending'
+  is_active: boolean
+  is_approved: boolean
+  email_verified: boolean
+  profile_image_url?: string
+  phone?: string
+}
+
+// Student Signup Request
+export interface StudentSignupRequest {
+  full_name: string
+  email: string
+  phone?: string
+  batch_year?: number
+  reason?: string
+  password?: string
+  confirm_password?: string
+}
+
+// Signup Request Status
+export interface SignupRequest {
+  id: string
+  full_name: string
+  email: string
+  phone?: string
+  batch_year?: number
+  reason?: string
+  status: 'pending' | 'approved' | 'rejected'
+  is_email_verified: boolean
+  profile_image_url?: string
+  verification_token?: string
+  verification_token_expires?: string
+  created_at: string
+  updated_at: string
+  reviewed_by?: string
+  reviewed_at?: string
+  review_comment?: string
+}
+
+// Admin Dashboard
+export interface AdminStats {
+  total_students: number
+  pending_approvals: number
+  active_students: number
+  total_admins: number
+}
+
+// Image Upload Response
+export interface ImageUploadResponse {
+  success: boolean
+  message: string
+  image_url?: string
+  error?: string
+}

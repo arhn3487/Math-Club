@@ -1,53 +1,195 @@
-# Quick Start Guide
+# Quick Start Guide - Math Club Authentication System
 
 ## 5-Minute Setup
 
-### 1. **Install Dependencies**
+### Step 1: Create PostgreSQL Database
 ```bash
-cd "Math Club Website"
+psql -U postgres
+```
+
+```sql
+CREATE DATABASE math_club;
+\q
+```
+
+### Step 2: Load Schema
+```bash
+psql -U postgres -d math_club -f database.sql
+```
+
+### Step 3: Environment Setup
+```bash
+# Copy the example environment file
+cp .env.local.example .env.local
+```
+
+Edit `.env.local` and set:
+```
+DB_USER=postgres
+DB_PASSWORD=your_password
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=math_club
+JWT_SECRET=change-this-in-production
+```
+
+### Step 4: Install & Run
+```bash
+npm install
+npm run dev
+# or with Bun:
 bun install
-```
-
-### 2. **Configure Supabase**
-- Go to [Supabase](https://supabase.com)
-- Create a new project or use existing one
-- Copy your credentials
-- Create `.env.local` (or rename `.env.example`):
-
-```env
-NEXT_PUBLIC_SUPABASE_URL=your_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_key
-SUPABASE_SERVICE_ROLE_KEY=your_service_key
-```
-
-### 3. **Initialize Database**
-1. Go to Supabase SQL Editor
-2. Copy the schema from the `CREATE TABLE` statements
-3. Run the SQL to create all tables
-
-### 4. **Start Development**
-```bash
 bun run dev
 ```
 
-Visit `http://localhost:3000` 🎉
+### Step 5: Test Login
+Open http://localhost:3000 and login with:
+- **Student**: user_id: `student_001`, password: `password123`
+- **Admin**: user_id: `admin_001`, password: `password123`
 
-## 🚀 Common Tasks
+## File Organization
 
-### Add Sample Data
+### Authentication Files
+- `lib/auth.ts` - Auth utilities (hashing, tokens, validation)
+- `lib/postgres.ts` - PostgreSQL connection pool
+- `types/dtos.ts` - Data Transfer Objects
+
+### API Routes
+- `app/api/auth/login/route.ts` - Login endpoint
+- `app/api/auth/register/route.ts` - User registration (admin only)
+- `app/api/auth/verify/route.ts` - Token verification
+
+### Pages
+- `app/login/page.tsx` - Login page
+- `app/dashboard/page.tsx` - User dashboard
+- `app/admin/register/page.tsx` - Admin user registration
+- `app/page.tsx` - Home page (with redirection)
+
+### Database
+- `database.sql` - Complete schema with demo data
+
+## Database Schema
+
+**users table:**
+```
+- id: Primary key (auto-generated)
+- user_id: Unique identifier (required for login)
+- password_hash: Bcrypt hashed password
+- user_type: 'student' or 'admin'
+- full_name: User's name
+- email: User's email
+- is_active: Account status
+- created_at, updated_at: Timestamps
+```
+
+## Key Features Implemented
+
+✅ **Authentication**
+- JWT token generation (7-day expiration)
+- Bcryptjs password hashing
+- Role-based access control
+
+✅ **Validation**
+- Input field validation
+- Email format checking
+- Password strength requirements
+
+✅ **Error Handling**
+- User-friendly error messages
+- Proper HTTP status codes
+- Token expiration handling
+
+✅ **Database**
+- PostgreSQL integration with pg driver
+- Connection pooling
+- Proper indexes for performance
+
+## Common Commands
+
 ```bash
-# Use Supabase UI to insert test data
+# View all users
+psql -U postgres -d math_club -c "SELECT user_id, user_type, full_name FROM users;"
+
+# Deactivate user
+psql -U postgres -d math_club -c "UPDATE users SET is_active = false WHERE user_id = 'student_001';"
+
+# Delete user
+psql -U postgres -d math_club -c "DELETE FROM users WHERE user_id = 'student_001';"
+
+# Reset password (requires bcrypt hash)
+psql -U postgres -d math_club -c "UPDATE users SET password_hash = 'NEW_HASH' WHERE user_id = 'student_001';"
 ```
 
-### View Database
+## Architecture
+
 ```
-Supabase Dashboard → Tables → [select table]
+┌─────────────────────────────────────────┐
+│         Client (React/Next.js)          │
+│  - Login Page                           │
+│  - Dashboard                            │
+│  - Admin Registration                   │
+└──────────────┬──────────────────────────┘
+               │ HTTP(S)
+               ▼
+┌─────────────────────────────────────────┐
+│    API Routes (Next.js Backend)         │
+│  - POST /api/auth/login                 │
+│  - POST /api/auth/register              │
+│  - GET /api/auth/verify                 │
+└──────────────┬──────────────────────────┘
+               │ pg driver
+               ▼
+┌─────────────────────────────────────────┐
+│       PostgreSQL Database               │
+│  - users table                          │
+│  - Indexes for performance              │
+└─────────────────────────────────────────┘
 ```
 
-### Deploy to Vercel
+## Next Steps
+
+1. **Customize Demo Data**: Update `database.sql` with real user data
+2. **Add User Profile Page**: Create `/app/dashboard/profile/page.tsx`
+3. **Implement Admin Dashboard**: Create user management interface
+4. **Add Password Reset**: Implement forgot password flow
+5. **Enable Supabase Images**: Configure image storage
+6. **Add Rate Limiting**: Protect auth endpoints
+7. **Implement Logging**: Add authentication audit logs
+
+## Troubleshooting
+
+**Error: Could not connect to database**
+- Ensure PostgreSQL is running: `pg_ctl status`
+- Check connection string in `.env.local`
+- Verify database exists: `psql -U postgres -l`
+
+**Error: Password incorrect**
+- Check username (user_id, not email)
+- Demo credentials: student_001/password123 or admin_001/password123
+
+**Token verification failed**
+- Token may be expired (7 days)
+- User needs to log in again
+- Check JWT_SECRET matches between login and verify
+
+**Port 3000 already in use**
 ```bash
-# Install Vercel CLI
-bun install -g vercel
+# Use different port
+npm run dev -- -p 3001
+```
+
+## Production Checklist
+
+- [ ] Change JWT_SECRET
+- [ ] Enable HTTPS
+- [ ] Set secure database password
+- [ ] Configure CORS properly
+- [ ] Enable rate limiting
+- [ ] Add request logging
+- [ ] Set up database backups
+- [ ] Use environment-specific configs
+- [ ] Enable CSRF protection
+- [ ] Add security headers
 
 # Deploy
 vercel deploy

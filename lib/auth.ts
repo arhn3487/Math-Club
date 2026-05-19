@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import { AuthPayload, UserProfileDTO } from '@/types/dtos'
-import { query } from './postgres'
+import { supabase, getSupabaseAdmin } from './supabaseClient'
 import { UserEntity } from '@/types/dtos'
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production'
@@ -51,14 +51,18 @@ export function extractTokenFromHeader(authHeader: string | null): string | null
 
 export async function getUserById(userId: string): Promise<UserProfileDTO | null> {
   try {
-    const result = await query<UserEntity>(
-      'SELECT * FROM users WHERE user_id = $1',
-      [userId]
-    )
+    const { data, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('user_id', userId)
+      .single()
 
-    if (result.rows.length === 0) return null
+    if (error || !data) {
+      console.error('Error fetching user:', error)
+      return null
+    }
 
-    const user = result.rows[0]
+    const user = data as UserEntity
     return {
       id: user.id,
       user_id: user.user_id,
@@ -74,14 +78,34 @@ export async function getUserById(userId: string): Promise<UserProfileDTO | null
 }
 
 export async function getUserByUserIdWithPassword(
-  userId: string
+  userIdOrEmail: string
 ): Promise<UserEntity | null> {
   try {
-    const result = await query<UserEntity>(
-      'SELECT * FROM users WHERE user_id = $1',
-      [userId]
-    )
-    return result.rows.length > 0 ? result.rows[0] : null
+    const admin = getSupabaseAdmin()
+
+    // Try to find by email first
+    const { data: emailData, error: emailError } = await admin
+      .from('users')
+      .select('*')
+      .eq('email', userIdOrEmail)
+      .single()
+
+    if (emailData) {
+      return emailData as UserEntity
+    }
+
+    // If not found by email, try user_id
+    const { data: userIdData, error: userIdError } = await admin
+      .from('users')
+      .select('*')
+      .eq('user_id', userIdOrEmail)
+      .single()
+
+    if (userIdData) {
+      return userIdData as UserEntity
+    }
+
+    return null
   } catch (error) {
     console.error('Error fetching user:', error)
     throw error
@@ -99,18 +123,27 @@ export async function createUser(
     const id = `${userType}_${userId}_${Date.now()}`
     const now = new Date()
 
-    const result = await query<UserEntity>(
-      `INSERT INTO users (id, user_id, password_hash, user_type, full_name, email, is_active, created_at, updated_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-       RETURNING *`,
-      [id, userId, passwordHash, userType, fullName, email, true, now, now]
-    )
+    const { data, error } = await getSupabaseAdmin()
+      .from('users')
+      .insert({
+        id,
+        user_id: userId,
+        password_hash: passwordHash,
+        user_type: userType,
+        full_name: fullName,
+        email,
+        is_active: true,
+        created_at: now,
+        updated_at: now,
+      })
+      .select()
+      .single()
 
-    if (result.rows.length === 0) {
-      throw new Error('Failed to create user')
+    if (error || !data) {
+      throw new Error(`Failed to create user: ${error?.message}`)
     }
 
-    return result.rows[0]
+    return data as UserEntity
   } catch (error) {
     console.error('Error creating user:', error)
     throw error

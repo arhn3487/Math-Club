@@ -1,185 +1,239 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import axios from 'axios'
-import { UserProfileDTO } from '@/types/dtos'
+import Link from 'next/link'
+
+interface DashboardData {
+  userType: 'student' | 'admin'
+  userName: string
+  userId: string
+  profileImage?: string
+  isApproved?: boolean
+}
 
 export default function DashboardPage() {
   const router = useRouter()
-  const [user, setUser] = useState<UserProfileDTO | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState('')
+  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const verifyToken = async () => {
-      try {
-        const token = localStorage.getItem('auth_token')
+    const token = localStorage.getItem('auth_token')
+    const userType = localStorage.getItem('user_type')
+    const userId = localStorage.getItem('user_id')
+    const fullName = localStorage.getItem('full_name')
+    const profileImage = localStorage.getItem('profile_image_url')
 
-        if (!token) {
-          router.push('/login')
-          return
-        }
-
-        // Verify token
-        const response = await axios.get('/api/auth/verify', {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-
-        if (!response.data.success) {
-          localStorage.removeItem('auth_token')
-          router.push('/login')
-          return
-        }
-
-        // Load user data from localStorage
-        const userType = localStorage.getItem('user_type')
-        const userId = localStorage.getItem('user_id')
-
-        if (userType && userId) {
-          setUser({
-            id: '',
-            user_id: userId,
-            user_type: (userType as 'student' | 'admin') || 'student',
-            full_name: 'User',
-            email: 'user@example.com',
-            is_active: true,
-          })
-        }
-
-        setIsLoading(false)
-      } catch (err) {
-        console.error('Verification error:', err)
-        localStorage.removeItem('auth_token')
-        router.push('/login')
-      }
+    if (!token || !userType) {
+      router.push('/login')
+      return
     }
 
-    verifyToken()
+    // Get user name from API or decode token
+    const decodedUserType = userType as 'student' | 'admin'
+    setDashboardData({
+      userType: decodedUserType,
+      userName: 'Welcome',
+      userId: fullName || userId || 'User',
+      profileImage: profileImage || undefined,
+    })
+    setLoading(false)
   }, [router])
 
-  const handleLogout = () => {
-    localStorage.removeItem('auth_token')
-    localStorage.removeItem('user_type')
-    localStorage.removeItem('user_id')
-    router.push('/login')
-  }
-
-  if (isLoading) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading dashboard...</p>
         </div>
       </div>
     )
   }
 
-  if (error || !user) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-600">{error || 'Failed to load user data'}</p>
-        </div>
-      </div>
-    )
+  if (!dashboardData) {
+    return null
   }
+
+  const isStudent = dashboardData.userType === 'student'
+  const isAdmin = dashboardData.userType === 'admin'
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-              <p className="text-gray-600 mt-1">Welcome back to Math Club</p>
+      {/* Navigation */}
+      <nav className="bg-white shadow">
+        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+          <div className="text-2xl font-bold text-indigo-600">Math Club</div>
+          <div className="flex items-center gap-6">
+            {/* Profile Section */}
+            <div className="flex items-center gap-3">
+              {dashboardData.profileImage ? (
+                <img 
+                  src={dashboardData.profileImage} 
+                  alt="Profile" 
+                  className="w-10 h-10 rounded-full object-cover border-2 border-indigo-600"
+                />
+              ) : (
+                <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-sm font-bold text-indigo-600 border-2 border-indigo-600">
+                  {dashboardData.userId.charAt(0).toUpperCase()}
+                </div>
+              )}
+              <div>
+                <div className="text-sm font-medium text-gray-700">{dashboardData.userId}</div>
+                <div className="text-xs text-gray-500 capitalize">{dashboardData.userType}</div>
+              </div>
             </div>
             <button
-              onClick={handleLogout}
-              className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition duration-200"
+              onClick={() => {
+                localStorage.removeItem('auth_token')
+                localStorage.removeItem('user_type')
+                localStorage.removeItem('user_id')
+                localStorage.removeItem('full_name')
+                localStorage.removeItem('profile_image_url')
+                router.push('/')
+              }}
+              className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
             >
               Logout
             </button>
           </div>
         </div>
-      </header>
+      </nav>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* User Info Card */}
-        <div className="bg-white rounded-lg shadow p-8 mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">User Information</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <p className="text-gray-600 text-sm font-medium">User ID</p>
-              <p className="text-gray-900 text-lg font-semibold">{user.user_id}</p>
+      <div className="max-w-7xl mx-auto px-4 py-12">
+        {/* Profile Card */}
+        <div className="mb-12 bg-white rounded-lg shadow p-8 flex items-center gap-8">
+          {dashboardData.profileImage ? (
+            <img 
+              src={dashboardData.profileImage} 
+              alt="Profile" 
+              className="w-24 h-24 rounded-lg object-cover border-4 border-indigo-600"
+            />
+          ) : (
+            <div className="w-24 h-24 rounded-lg bg-indigo-100 flex items-center justify-center text-3xl font-bold text-indigo-600 border-4 border-indigo-600">
+              {dashboardData.userId.charAt(0).toUpperCase()}
             </div>
-            <div>
-              <p className="text-gray-600 text-sm font-medium">User Type</p>
-              <p className="text-gray-900 text-lg font-semibold capitalize">{user.user_type}</p>
-            </div>
-            <div>
-              <p className="text-gray-600 text-sm font-medium">Full Name</p>
-              <p className="text-gray-900 text-lg font-semibold">{user.full_name}</p>
-            </div>
-            <div>
-              <p className="text-gray-600 text-sm font-medium">Email</p>
-              <p className="text-gray-900 text-lg font-semibold">{user.email}</p>
-            </div>
+          )}
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">Welcome to Math Club!</h2>
+            <p className="text-gray-600 mt-1">
+              {isStudent
+                ? 'Access exams, class recordings, and connect with your batchmates'
+                : 'Manage users, exams, class recordings, and announcements'}
+            </p>
           </div>
         </div>
 
-        {/* Role-based Content */}
-        {user.user_type === 'admin' && (
-          <div className="bg-white rounded-lg shadow p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Admin Panel</h2>
-            <p className="text-gray-600 mb-4">
-              You have administrative access to manage users and system settings.
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <a
-                href="/admin/users"
-                className="block p-4 border-2 border-blue-600 rounded-lg hover:bg-blue-50 transition duration-200"
-              >
-                <h3 className="font-semibold text-blue-600">Manage Users</h3>
-                <p className="text-gray-600 text-sm">View and manage all users</p>
-              </a>
-              <a
-                href="/admin/register"
-                className="block p-4 border-2 border-green-600 rounded-lg hover:bg-green-50 transition duration-200"
-              >
-                <h3 className="font-semibold text-green-600">Register User</h3>
-                <p className="text-gray-600 text-sm">Create new user accounts</p>
-              </a>
-            </div>
+        {/* Student Dashboard */}
+        {isStudent && (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <Link href="/exams">
+              <div className="bg-white rounded-lg shadow p-8 hover:shadow-lg transition cursor-pointer">
+                <div className="text-5xl mb-4">📝</div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">Exams</h2>
+                <p className="text-gray-600">Take exams and view your results with instant scoring</p>
+              </div>
+            </Link>
+
+            <Link href="/class-recordings">
+              <div className="bg-white rounded-lg shadow p-8 hover:shadow-lg transition cursor-pointer">
+                <div className="text-5xl mb-4">🎥</div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">Class Recordings</h2>
+                <p className="text-gray-600">Watch recorded class sessions and tutorials</p>
+              </div>
+            </Link>
+
+            <Link href="/alumni">
+              <div className="bg-white rounded-lg shadow p-8 hover:shadow-lg transition cursor-pointer">
+                <div className="text-5xl mb-4">👥</div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">Batchmates</h2>
+                <p className="text-gray-600">Connect with members of your batch</p>
+              </div>
+            </Link>
+
+            <Link href="/notices">
+              <div className="bg-white rounded-lg shadow p-8 hover:shadow-lg transition cursor-pointer">
+                <div className="text-5xl mb-4">📢</div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">Notices</h2>
+                <p className="text-gray-600">Stay updated with latest announcements and events</p>
+              </div>
+            </Link>
           </div>
         )}
 
-        {user.user_type === 'student' && (
-          <div className="bg-white rounded-lg shadow p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Student Dashboard</h2>
-            <p className="text-gray-600 mb-4">Welcome to your student dashboard.</p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="p-4 bg-blue-50 rounded-lg">
-                <h3 className="font-semibold text-blue-900">Courses</h3>
-                <p className="text-blue-600 text-lg">0</p>
+        {/* Admin Dashboard */}
+        {isAdmin && (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <Link href="/admin/users">
+              <div className="bg-white rounded-lg shadow p-8 hover:shadow-lg transition cursor-pointer">
+                <div className="text-5xl mb-4">👤</div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">User Management</h2>
+                <p className="text-gray-600">Manage students and admins, filter by batch</p>
               </div>
-              <div className="p-4 bg-green-50 rounded-lg">
-                <h3 className="font-semibold text-green-900">Achievements</h3>
-                <p className="text-green-600 text-lg">0</p>
+            </Link>
+
+            <Link href="/admin/exams">
+              <div className="bg-white rounded-lg shadow p-8 hover:shadow-lg transition cursor-pointer">
+                <div className="text-5xl mb-4">✏️</div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">Exam Management</h2>
+                <p className="text-gray-600">Create exams, add questions, and view results</p>
               </div>
-              <div className="p-4 bg-purple-50 rounded-lg">
-                <h3 className="font-semibold text-purple-900">Progress</h3>
-                <p className="text-purple-600 text-lg">0%</p>
+            </Link>
+
+            <Link href="/admin/class-recordings">
+              <div className="bg-white rounded-lg shadow p-8 hover:shadow-lg transition cursor-pointer">
+                <div className="text-5xl mb-4">🎬</div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">Class Recordings</h2>
+                <p className="text-gray-600">Upload and manage YouTube class recordings</p>
               </div>
-            </div>
+            </Link>
+
+            <Link href="/admin/notices">
+              <div className="bg-white rounded-lg shadow p-8 hover:shadow-lg transition cursor-pointer">
+                <div className="text-5xl mb-4">📣</div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">Notices</h2>
+                <p className="text-gray-600">Post announcements and event notices</p>
+              </div>
+            </Link>
+
+            <Link href="/admin/approvals">
+              <div className="bg-white rounded-lg shadow p-8 hover:shadow-lg transition cursor-pointer">
+                <div className="text-5xl mb-4">✅</div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">Approve Students</h2>
+                <p className="text-gray-600">Review and approve pending student accounts</p>
+              </div>
+            </Link>
+
+            <Link href="/alumni">
+              <div className="bg-white rounded-lg shadow p-8 hover:shadow-lg transition cursor-pointer">
+                <div className="text-5xl mb-4">👥</div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">All Members</h2>
+                <p className="text-gray-600">View and manage all community members</p>
+              </div>
+            </Link>
           </div>
         )}
-      </main>
+
+        {/* Quick Stats */}
+        <div className="mt-16 grid md:grid-cols-4 gap-6">
+          <div className="bg-white rounded-lg shadow p-6 text-center">
+            <div className="text-3xl font-bold text-indigo-600">500+</div>
+            <p className="text-gray-600 mt-2">Active Members</p>
+          </div>
+          <div className="bg-white rounded-lg shadow p-6 text-center">
+            <div className="text-3xl font-bold text-indigo-600">50+</div>
+            <p className="text-gray-600 mt-2">Available Exams</p>
+          </div>
+          <div className="bg-white rounded-lg shadow p-6 text-center">
+            <div className="text-3xl font-bold text-indigo-600">100+</div>
+            <p className="text-gray-600 mt-2">Class Recordings</p>
+          </div>
+          <div className="bg-white rounded-lg shadow p-6 text-center">
+            <div className="text-3xl font-bold text-indigo-600">20+</div>
+            <p className="text-gray-600 mt-2">Batches</p>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

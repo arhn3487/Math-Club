@@ -79,6 +79,12 @@ export default function LoginPage() {
         localStorage.setItem('auth_token', response.data.token)
         localStorage.setItem('user_type', response.data.user?.user_type)
         localStorage.setItem('user_id', response.data.user?.user_id)
+        localStorage.setItem('full_name', response.data.user?.full_name || 'User')
+        if (response.data.user?.profile_image_url) {
+          localStorage.setItem('profile_image_url', response.data.user.profile_image_url)
+        } else {
+          localStorage.removeItem('profile_image_url')
+        }
 
         setSuccessMessage('Login successful! Redirecting...')
         setTimeout(() => {
@@ -155,7 +161,7 @@ export default function LoginPage() {
             {/* User ID Field */}
             <div>
               <label htmlFor="user_id" className="block text-sm font-medium text-gray-700 mb-1">
-                User ID
+                Student ID or Admin ID
               </label>
               <input
                 type="text"
@@ -169,7 +175,7 @@ export default function LoginPage() {
                     ? 'border-red-500 bg-red-50'
                     : 'border-gray-300'
                 }`}
-                placeholder="Enter your user ID"
+                placeholder="e.g., STU001 or ADM001"
               />
               {getFieldError('user_id') && (
                 <p className="mt-1 text-sm text-red-600">{getFieldError('user_id')}</p>

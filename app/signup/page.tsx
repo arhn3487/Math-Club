@@ -4,25 +4,30 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
-export default function StudentSignupPage() {
+export default function SignupPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
+  const [userType, setUserType] = useState<'student' | 'admin' | ''>('')
   const [signupId, setSignupId] = useState('')
+  
+  const currentYear = new Date().getFullYear()
+  const batchYears = Array.from({ length: currentYear - 2013 }, (_, i) => 2014 + i).reverse()
+
   const [formData, setFormData] = useState({
     full_name: '',
     email: '',
-    phone: '',
-    batch_year: new Date().getFullYear(),
-    reason: '',
+    student_id: '',
+    admin_id: '',
+    batch_year: currentYear,
     password: '',
     confirm_password: '',
     profile_image: null as File | null,
   })
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
@@ -41,19 +46,27 @@ export default function StudentSignupPage() {
     setLoading(true)
 
     try {
-      // Submit signup request
+      const formDataToSend = new FormData()
+      formDataToSend.append('full_name', formData.full_name)
+      formDataToSend.append('email', formData.email)
+      formDataToSend.append('password', formData.password)
+      formDataToSend.append('confirm_password', formData.confirm_password)
+      formDataToSend.append('user_type', userType)
+      
+      if (userType === 'student') {
+        formDataToSend.append('student_id', formData.student_id)
+        formDataToSend.append('batch_year', formData.batch_year.toString())
+      } else {
+        formDataToSend.append('admin_id', formData.admin_id)
+      }
+
+      if (formData.profile_image) {
+        formDataToSend.append('profile_image', formData.profile_image)
+      }
+
       const signupResponse = await fetch('/api/auth/signup', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          full_name: formData.full_name,
-          email: formData.email,
-          phone: formData.phone,
-          batch_year: formData.batch_year,
-          reason: formData.reason,
-          password: formData.password,
-          confirm_password: formData.confirm_password,
-        }),
+        body: formDataToSend,
       })
 
       const signupData = await signupResponse.json()
@@ -64,26 +77,8 @@ export default function StudentSignupPage() {
         return
       }
 
-      const newSignupId = signupData.signup_request_id
-
-      // Upload profile image if provided
-      if (formData.profile_image) {
-        const imageFormData = new FormData()
-        imageFormData.append('file', formData.profile_image)
-        imageFormData.append('signup_request_id', newSignupId)
-
-        const imageResponse = await fetch('/api/uploads/profile-image', {
-          method: 'POST',
-          body: imageFormData,
-        })
-
-        if (!imageResponse.ok) {
-          console.error('Image upload failed')
-        }
-      }
-
       setSuccess(true)
-      setSignupId(newSignupId)
+      setSignupId(signupData.user_id)
     } catch (err) {
       setError('An unexpected error occurred. Please try again.')
       console.error('Signup error:', err)
@@ -114,8 +109,7 @@ export default function StudentSignupPage() {
             </div>
             <h2 className="mt-4 text-2xl font-bold text-gray-900">Signup Successful!</h2>
             <p className="mt-2 text-gray-600">
-              Check your email to verify your account. An admin will review your request and
-              approve or reject it.
+              Check your email to verify your account. An admin will review your request and approve or reject it.
             </p>
             <Link
               href="/login"
@@ -129,10 +123,55 @@ export default function StudentSignupPage() {
     )
   }
 
+  if (!userType) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+        <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2 text-center">Join Math Club</h1>
+          <p className="text-gray-600 mb-8 text-center">Select your account type to continue</p>
+
+          <div className="space-y-4">
+            <button
+              onClick={() => setUserType('student')}
+              className="w-full p-4 border-2 border-indigo-600 rounded-lg hover:bg-indigo-50 transition text-left"
+            >
+              <div className="font-bold text-indigo-600">Student Account</div>
+              <div className="text-sm text-gray-600">Access courses, exams, and resources</div>
+            </button>
+            
+            <button
+              onClick={() => setUserType('admin')}
+              className="w-full p-4 border-2 border-green-600 rounded-lg hover:bg-green-50 transition text-left"
+            >
+              <div className="font-bold text-green-600">Admin Account</div>
+              <div className="text-sm text-gray-600">Manage content, exams, and users</div>
+            </button>
+          </div>
+
+          <p className="text-center text-gray-600 text-sm mt-6">
+            Already have an account?{' '}
+            <Link href="/login" className="text-indigo-600 hover:text-indigo-700 font-medium">
+              Login
+            </Link>
+          </p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4 py-12">
       <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Student Signup</h1>
+        <button
+          onClick={() => setUserType('')}
+          className="mb-4 text-indigo-600 hover:text-indigo-700 text-sm font-medium"
+        >
+          ← Back to Account Type
+        </button>
+
+        <h1 className="text-3xl font-bold text-gray-900 mb-1">
+          {userType === 'student' ? 'Student' : 'Admin'} Signup
+        </h1>
         <p className="text-gray-600 mb-6">Join the Math Club</p>
 
         {error && (
@@ -168,45 +207,54 @@ export default function StudentSignupPage() {
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-            <input
-              type="tel"
-              name="phone"
-              value={formData.phone}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder="+1234567890"
-            />
-          </div>
+          {userType === 'student' && (
+            <>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Student ID *</label>
+                <input
+                  type="text"
+                  name="student_id"
+                  value={formData.student_id}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  placeholder="e.g., STU001"
+                />
+              </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Batch Year</label>
-            <select
-              name="batch_year"
-              value={formData.batch_year}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            >
-              {[2024, 2025, 2026, 2027, 2028].map((year) => (
-                <option key={year} value={year}>
-                  {year}
-                </option>
-              ))}
-            </select>
-          </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Batch Year *</label>
+                <select
+                  name="batch_year"
+                  value={formData.batch_year}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                >
+                  {batchYears.map((year) => (
+                    <option key={year} value={year}>
+                      {year}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </>
+          )}
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Why join us?</label>
-            <textarea
-              name="reason"
-              value={formData.reason}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
-              rows={3}
-              placeholder="Tell us why you want to join..."
-            />
-          </div>
+          {userType === 'admin' && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Admin ID *</label>
+              <input
+                type="text"
+                name="admin_id"
+                value={formData.admin_id}
+                onChange={handleChange}
+                required
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                placeholder="e.g., ADM001"
+              />
+            </div>
+          )}
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Profile Photo</label>

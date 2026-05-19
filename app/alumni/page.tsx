@@ -1,27 +1,65 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Loading, Error, Button } from '@/components/ui/BaseComponents'
-import { AlumniCard } from '@/components/cards/FeatureCards'
-import { AlumniMember } from '@/types'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
+interface Member {
+  id: string
+  user_id: string
+  full_name: string
+  email: string
+  user_type: 'student' | 'admin'
+  batch_year?: number
+  profile_image_url?: string
+}
+
 export default function AlumniPage() {
-  const [alumni, setAlumni] = useState<AlumniMember[]>([])
+  const router = useRouter()
+  const [members, setMembers] = useState<Member[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [userType, setUserType] = useState<'student' | 'admin' | null>(null)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [filterBatch, setFilterBatch] = useState<number | 'all'>('all')
+  const [batches, setBatches] = useState<number[]>([])
 
   useEffect(() => {
-    fetchAlumni()
-  }, [])
+    const token = localStorage.getItem('auth_token')
+    const type = localStorage.getItem('user_type')
 
-  const fetchAlumni = async () => {
+    if (!token) {
+      router.push('/login')
+      return
+    }
+
+    setUserType(type as 'student' | 'admin')
+    fetchMembers()
+  }, [router])
+
+  const fetchMembers = async () => {
     try {
       setLoading(true)
-      const response = await fetch('/api/alumni')
-      if (!response.ok) throw new Error('Failed to fetch alumni')
+      const response = await fetch('/api/members', {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
+        },
+      })
+
+      if (!response.ok) throw new Error('Failed to fetch members')
+
       const data = await response.json()
-      setAlumni(data)
+      setMembers(data.members)
+
+      // Extract unique batch years for filtering
+      const uniqueBatches = Array.from(new Set(data.members.map((m: Member) => m.batch_year).filter(Boolean))) as number[]
+      setBatches(uniqueBatches.sort((a, b) => b - a))
+
+      // For students, default to their batch
+      if (userType === 'student' && localStorage.getItem('user_batch')) {
+        setFilterBatch(parseInt(localStorage.getItem('user_batch') || ''))
+      }
+
       setError(null)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
@@ -30,40 +68,162 @@ export default function AlumniPage() {
     }
   }
 
+  const filteredMembers = members.filter((member) => {
+    const matchesSearch =
+      member.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      member.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      member.user_id.toLowerCase().includes(searchTerm.toLowerCase())
+
+    if (userType === 'student') {
+      // Students only see their batchmates
+      return matchesSearch
+    } else {
+      // Admins can filter by batch
+      const matchesBatch = filterBatch === 'all' ? true : member.batch_year === filterBatch
+      return matchesSearch && matchesBatch
+    }
+  })
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading members...</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <div className="w-full">
-      <section className="page-header">
-        <div className="container">
-          <h1 className="page-title">Alumni</h1>
-          <p className="page-subtitle">Meet our accomplished alumni</p>
+    <div className="min-h-screen bg-gray-50">
+      {/* Navigation */}
+      <nav className="bg-white shadow">
+        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+          <Link href="/dashboard">
+            <div className="text-2xl font-bold text-indigo-600 cursor-pointer">Math Club</div>
+          </Link>
+          <button
+            onClick={() => {
+              localStorage.removeItem('auth_token')
+              localStorage.removeItem('user_type')
+              localStorage.removeItem('user_id')
+              router.push('/')
+            }}
+            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+          >
+            Logout
+          </button>
         </div>
-      </section>
+      </nav>
 
-      <section className="py-12">
-        <div className="container">
-          {loading && <Loading message="Loading alumni..." />}
-          {error && <Error message={error} onRetry={fetchAlumni} />}
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">
+            {userType === 'student' ? 'Batchmates' : 'All Members'}
+          </h1>
+          <p className="text-gray-600 mt-2">
+            {userType === 'student'
+              ? 'Connect with your batch members'
+              : 'Manage and view all members in the community'}
+          </p>
+        </div>
 
-          {!loading && !error && alumni.length === 0 && (
-            <div className="text-center py-12">
-              <p className="text-gray-600 text-lg mb-4">No alumni members yet</p>
-              <Link href="/">
-                <Button>Back to Home</Button>
-              </Link>
+        {error && (
+          <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded text-red-700">
+            {error}
+          </div>
+        )}
+
+        {/* Filters */}
+        <div className="bg-white rounded-lg shadow mb-6 p-6">
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Search</label>
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search by name, email, or user ID..."
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+            {userType === 'admin' && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Batch Year</label>
+                <select
+                  value={filterBatch}
+                  onChange={(e) => setFilterBatch(e.target.value === 'all' ? 'all' : parseInt(e.target.value))}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                >
+                  <option value="all">All Batches</option>
+                  {batches.map((batch) => (
+                    <option key={batch} value={batch}>
+                      {batch}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Members Grid */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredMembers.length > 0 ? (
+            filteredMembers.map((member) => (
+              <div
+                key={member.id}
+                className="bg-white rounded-lg shadow hover:shadow-lg transition p-6 text-center"
+              >
+                {member.profile_image_url ? (
+                  <img
+                    src={member.profile_image_url}
+                    alt={member.full_name}
+                    className="w-20 h-20 rounded-full mx-auto mb-4 object-cover"
+                  />
+                ) : (
+                  <div className="w-20 h-20 rounded-full mx-auto mb-4 bg-indigo-600 flex items-center justify-center text-white text-2xl font-bold">
+                    {member.full_name.charAt(0)}
+                  </div>
+                )}
+
+                <h3 className="text-lg font-bold text-gray-900 mb-1">{member.full_name}</h3>
+
+                <div className="flex justify-center gap-2 mb-3">
+                  <span
+                    className={`px-2 py-1 rounded text-xs font-medium text-white ${
+                      member.user_type === 'admin' ? 'bg-purple-600' : 'bg-blue-600'
+                    }`}
+                  >
+                    {member.user_type === 'admin' ? 'Admin' : 'Student'}
+                  </span>
+                  {member.batch_year && (
+                    <span className="px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-800">
+                      Batch {member.batch_year}
+                    </span>
+                  )}
+                </div>
+
+                <p className="text-gray-600 text-sm mb-2">{member.email}</p>
+                <p className="text-gray-500 text-xs">ID: {member.user_id}</p>
+              </div>
+            ))
+          ) : (
+            <div className="col-span-full bg-white rounded-lg shadow p-12 text-center">
+              <div className="text-6xl mb-4">👥</div>
+              <p className="text-gray-600">
+                {searchTerm ? 'No members found matching your search.' : 'No members available.'}
+              </p>
             </div>
           )}
-
-          {!loading && !error && alumni.length > 0 && (
-            <div className="card-grid">
-              {alumni.map((member) => (
-                <Link key={member.id} href={`/alumni/${member.id}`}>
-                  <AlumniCard alumni={member} />
-                </Link>
-              ))}
-            </div>
-          )}
         </div>
-      </section>
+
+        <div className="mt-8 text-center text-gray-600">
+          Total members: {filteredMembers.length}
+        </div>
+      </div>
     </div>
   )
 }

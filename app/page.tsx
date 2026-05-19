@@ -65,7 +65,16 @@ export default function Home() {
       {/* Navigation */}
       <nav className="bg-white shadow-sm">
         <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="text-2xl font-bold text-indigo-600">Math Club</div>
+          <div className="flex items-center gap-3">
+            <Link href="/profile">
+              <img 
+                src="https://zxkeolkojkoenkszekiy.supabase.co/storage/v1/object/public/math-club-images/Math%20Club%20Logo/math%20club%20logo%202.png" 
+                alt="Math Club Logo" 
+                className="h-10 w-auto object-contain cursor-pointer"
+              />
+            </Link>
+            <span className="text-2xl font-bold text-indigo-600">Math Club</span>
+          </div>
           <div className="flex gap-4">
             <Link href="/login">
               <button className="px-4 py-2 text-indigo-600 hover:text-indigo-700 font-medium">

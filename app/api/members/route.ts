@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
 
       const { data: members, error } = await supabase
         .from('users')
-        .select('id, user_id, full_name, email, user_type, batch_year, profile_image_url')
+        .select('id, user_id, full_name, email, user_type, batch_year, profile_image_url, student_id, admin_id')
         .eq('batch_year', userData.batch_year)
         .eq('is_active', true)
 
@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
       // Admins see all members
       const { data: members, error } = await supabase
         .from('users')
-        .select('id, user_id, full_name, email, user_type, batch_year, profile_image_url')
+        .select('id, user_id, full_name, email, user_type, batch_year, profile_image_url, student_id, admin_id')
         .eq('is_active', true)
         .order('full_name', { ascending: true })
 

@@ -19,8 +19,13 @@ export function Navbar() {
   return (
     <nav className="bg-blue-600 text-white shadow-lg">
       <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-        <Link href="/" className="text-2xl font-bold">
-          Math Club
+        <Link href="/" className="flex items-center gap-3">
+          <img 
+            src="https://zxkeolkojkoenkszekiy.supabase.co/storage/v1/object/public/math-club-images/Math%20Club%20Logo/math%20club%20logo%202.png" 
+            alt="Math Club Logo" 
+            className="h-10 w-auto object-contain"
+          />
+          <span className="text-2xl font-bold">Math Club</span>
         </Link>
 
         {/* Desktop Menu */}
@@ -85,7 +90,14 @@ export function Footer() {
       <div className="max-w-7xl mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
           <div>
-            <h3 className="text-lg font-bold mb-4">Math Club</h3>
+            <div className="flex items-center gap-2 mb-4">
+              <img 
+                src="https://zxkeolkojkoenkszekiy.supabase.co/storage/v1/object/public/math-club-images/Math%20Club%20Logo/math%20club%20logo%202.png" 
+                alt="Math Club Logo" 
+                className="h-10 w-auto object-contain"
+              />
+              <h3 className="text-lg font-bold">Math Club</h3>
+            </div>
             <p className="text-gray-400">
               Empowering students through competitive programming and mathematics.
             </p>

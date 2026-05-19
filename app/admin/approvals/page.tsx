@@ -138,7 +138,14 @@ export default function ApprovalsPage() {
       <nav className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold text-indigo-600">Approve Students</h1>
+            <Link href="/dashboard" className="flex items-center gap-3">
+              <img 
+                src="https://zxkeolkojkoenkszekiy.supabase.co/storage/v1/object/public/math-club-images/Math%20Club%20Logo/math%20club%20logo%202.png" 
+                alt="Math Club Logo" 
+                className="h-10 w-auto object-contain"
+              />
+              <span className="text-2xl font-bold text-indigo-600">Approve Students</span>
+            </Link>
             <button
               onClick={() => router.back()}
               className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"

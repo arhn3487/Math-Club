@@ -63,7 +63,14 @@ export default function DashboardPage() {
       {/* Navigation */}
       <nav className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="text-2xl font-bold text-indigo-600">Math Club</div>
+          <Link href="/" className="flex items-center gap-3">
+            <img 
+              src="https://zxkeolkojkoenkszekiy.supabase.co/storage/v1/object/public/math-club-images/Math%20Club%20Logo/math%20club%20logo%202.png" 
+              alt="Math Club Logo" 
+              className="h-10 w-auto object-contain"
+            />
+            <span className="text-2xl font-bold text-indigo-600">Math Club</span>
+          </Link>
           <div className="flex items-center gap-6">
             {/* Profile Section */}
             <div className="flex items-center gap-3">

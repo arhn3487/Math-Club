@@ -12,6 +12,8 @@ interface Member {
   user_type: 'student' | 'admin'
   batch_year?: number
   profile_image_url?: string
+  student_id?: string
+  admin_id?: string
 }
 
 export default function AlumniPage() {
@@ -96,12 +98,17 @@ export default function AlumniPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen w-full bg-gray-50">
       {/* Navigation */}
       <nav className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <Link href="/dashboard">
-            <div className="text-2xl font-bold text-indigo-600 cursor-pointer">Math Club</div>
+          <Link href="/dashboard" className="flex items-center gap-3">
+            <img 
+              src="https://zxkeolkojkoenkszekiy.supabase.co/storage/v1/object/public/math-club-images/Math%20Club%20Logo/math%20club%20logo%202.png" 
+              alt="Math Club Logo" 
+              className="h-10 w-auto object-contain"
+            />
+            <span className="text-2xl font-bold text-indigo-600">Math Club</span>
           </Link>
           <button
             onClick={() => {
@@ -117,7 +124,7 @@ export default function AlumniPage() {
         </div>
       </nav>
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="w-full max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">
@@ -169,49 +176,39 @@ export default function AlumniPage() {
           </div>
         </div>
 
-        {/* Members Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Members List */}
+        <div className="space-y-3 w-full">
           {filteredMembers.length > 0 ? (
             filteredMembers.map((member) => (
               <div
                 key={member.id}
-                className="bg-white rounded-lg shadow hover:shadow-lg transition p-6 text-center"
+                className="bg-white rounded-lg shadow hover:shadow-lg transition p-4 flex items-center gap-6"
               >
                 {member.profile_image_url ? (
                   <img
                     src={member.profile_image_url}
                     alt={member.full_name}
-                    className="w-20 h-20 rounded-full mx-auto mb-4 object-cover"
+                    className="w-12 h-12 rounded-full flex-shrink-0 object-cover"
                   />
                 ) : (
-                  <div className="w-20 h-20 rounded-full mx-auto mb-4 bg-indigo-600 flex items-center justify-center text-white text-2xl font-bold">
+                  <div className="w-12 h-12 rounded-full flex-shrink-0 bg-indigo-600 flex items-center justify-center text-white font-bold">
                     {member.full_name.charAt(0)}
                   </div>
                 )}
 
-                <h3 className="text-lg font-bold text-gray-900 mb-1">{member.full_name}</h3>
-
-                <div className="flex justify-center gap-2 mb-3">
-                  <span
-                    className={`px-2 py-1 rounded text-xs font-medium text-white ${
-                      member.user_type === 'admin' ? 'bg-purple-600' : 'bg-blue-600'
-                    }`}
-                  >
-                    {member.user_type === 'admin' ? 'Admin' : 'Student'}
-                  </span>
-                  {member.batch_year && (
-                    <span className="px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-800">
-                      Batch {member.batch_year}
-                    </span>
-                  )}
+                <div className="flex-1 flex items-center gap-6">
+                  <h3 className="text-base font-semibold text-gray-900 min-w-fit">{member.full_name}</h3>
+                  <p className="text-gray-600 text-sm">
+                    {member.user_type === 'admin' 
+                      ? `Admin ID: ${member.admin_id}` 
+                      : `Student ID: ${member.student_id}`
+                    }
+                  </p>
                 </div>
-
-                <p className="text-gray-600 text-sm mb-2">{member.email}</p>
-                <p className="text-gray-500 text-xs">ID: {member.user_id}</p>
               </div>
             ))
           ) : (
-            <div className="col-span-full bg-white rounded-lg shadow p-12 text-center">
+            <div className="bg-white rounded-lg shadow p-12 text-center">
               <div className="text-6xl mb-4">👥</div>
               <p className="text-gray-600">
                 {searchTerm ? 'No members found matching your search.' : 'No members available.'}

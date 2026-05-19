@@ -138,7 +138,7 @@ export default function LoginPage() {
         {/* Header */}
         <div className="text-center mb-8">
           <img 
-            src="https://zxkeolkojkoenkszekiy.supabase.co/storage/v1/object/public/math-club-images/Math%20Club%20Logo/math%20club%20logo.png" 
+            src="https://zxkeolkojkoenkszekiy.supabase.co/storage/v1/object/public/math-club-images/Math%20Club%20Logo/math%20club%20logo%202.png" 
             alt="Math Club Logo" 
             className="h-32 w-auto mx-auto mb-4 object-contain"
           />

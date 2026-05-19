@@ -7,12 +7,12 @@ import bcrypt from 'bcryptjs'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { user_id, password } = body
+    const { user_id, password, user_type } = body
 
     // Validation
-    if (!user_id || !password) {
+    if (!user_id || !password || !user_type) {
       return NextResponse.json(
-        { success: false, message: 'User ID/Email and password are required' },
+        { success: false, message: 'User ID, password, and user type are required' },
         { status: 400 }
       )
     }
@@ -25,39 +25,32 @@ export async function POST(request: NextRequest) {
     }
 
     const admin = getSupabaseAdmin()
-
-    // Find user by student_id, admin_id, or email
     let user = null
-    const userIdUpper = user_id.toUpperCase()
-    
-    // Try student_id first (STU-xxxxx format)
-    if (userIdUpper.startsWith('STU')) {
+
+    // Query based on user_type
+    if (user_type === 'student') {
       const { data } = await admin
         .from('users')
         .select('*')
         .eq('student_id', user_id)
+        .eq('user_type', 'student')
         .single()
       user = data
-      console.log('Trying student_id:', user_id, 'Found:', !!user)
-    } 
-    // Try admin_id (ADM-xxxxx format)
-    else if (userIdUpper.startsWith('ADM')) {
+      console.log('Searching student with student_id:', user_id, 'Found:', !!user)
+    } else if (user_type === 'admin') {
       const { data } = await admin
         .from('users')
         .select('*')
         .eq('admin_id', user_id)
+        .eq('user_type', 'admin')
         .single()
       user = data
-      console.log('Trying admin_id:', user_id, 'Found:', !!user)
-    } 
-    // Try email
-    else {
-      const { data } = await admin
-        .from('users')
-        .select('*')
-        .eq('email', user_id)
-        .single()
-      user = data
+      console.log('Searching admin with admin_id:', user_id, 'Found:', !!user)
+    } else {
+      return NextResponse.json(
+        { success: false, message: 'Invalid user type' },
+        { status: 400 }
+      )
     }
 
     if (!user) {

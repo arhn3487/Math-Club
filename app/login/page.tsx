@@ -14,6 +14,7 @@ export default function LoginPage() {
   const [formData, setFormData] = useState({
     user_id: '',
     password: '',
+    user_type: 'student' as 'student' | 'admin',
   })
   const [errors, setErrors] = useState<LoginError[]>([])
   const [isLoading, setIsLoading] = useState(false)
@@ -72,6 +73,7 @@ export default function LoginPage() {
       const response = await axios.post('/api/auth/login', {
         user_id: formData.user_id.trim(),
         password: formData.password,
+        user_type: formData.user_type,
       })
 
       if (response.data.success) {
@@ -135,6 +137,11 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-8">
+          <img 
+            src="https://zxkeolkojkoenkszekiy.supabase.co/storage/v1/object/public/math-club-images/Math%20Club%20Logo/math%20club%20logo.png" 
+            alt="Math Club Logo" 
+            className="h-32 w-auto mx-auto mb-4 object-contain"
+          />
           <h1 className="text-4xl font-bold text-white mb-2">Math Club</h1>
           <p className="text-blue-100">Competitive Programming Excellence</p>
         </div>
@@ -158,10 +165,43 @@ export default function LoginPage() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Account Type Selection */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Account Type</label>
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFormData(prev => ({ ...prev, user_type: 'student' }))
+                  }}
+                  className={`flex-1 py-2 px-3 rounded-lg font-medium transition ${
+                    formData.user_type === 'student'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  Student
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFormData(prev => ({ ...prev, user_type: 'admin' }))
+                  }}
+                  className={`flex-1 py-2 px-3 rounded-lg font-medium transition ${
+                    formData.user_type === 'admin'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  Admin
+                </button>
+              </div>
+            </div>
+
             {/* User ID Field */}
             <div>
               <label htmlFor="user_id" className="block text-sm font-medium text-gray-700 mb-1">
-                Student ID or Admin ID
+                {formData.user_type === 'student' ? 'Student ID' : 'Admin ID'}
               </label>
               <input
                 type="text"
@@ -175,7 +215,7 @@ export default function LoginPage() {
                     ? 'border-red-500 bg-red-50'
                     : 'border-gray-300'
                 }`}
-                placeholder="e.g., STU001 or ADM001"
+                placeholder={formData.user_type === 'student' ? 'e.g., STU001' : 'e.g., ADM001'}
               />
               {getFieldError('user_id') && (
                 <p className="mt-1 text-sm text-red-600">{getFieldError('user_id')}</p>
@@ -216,12 +256,6 @@ export default function LoginPage() {
             </button>
           </form>
 
-          {/* Footer */}
-          <div className="mt-6 text-center text-sm text-gray-600">
-            <p>Demo Credentials (for testing):</p>
-            <p className="text-gray-500">Student ID: student_001</p>
-            <p className="text-gray-500">Admin ID: admin_001</p>
-          </div>
         </div>
       </div>
     </div>

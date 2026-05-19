@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabaseClient'
 import bcrypt from 'bcryptjs'
-import crypto from 'crypto'
 
 export async function POST(req: NextRequest) {
   try {
@@ -109,16 +108,15 @@ export async function POST(req: NextRequest) {
     // Hash password
     const password_hash = await bcrypt.hash(password, 10)
 
-    // Generate user_id
-    const prefix = user_type === 'student' ? 'STU' : 'ADM'
-    const user_id = `${prefix}-${Date.now()}-${crypto.randomBytes(2).toString('hex').toUpperCase()}`
+    // Use student_id or admin_id as user_id
+    const user_id = user_type === 'student' ? student_id : admin_id
 
     // Upload profile image if provided
     let profile_image_url = null
     if (profile_image && profile_image.size > 0) {
       try {
         const fileExt = profile_image.name.split('.').pop()
-        const fileName = `${user_id}-${Date.now()}.${fileExt}`
+        const fileName = `${user_id}.${fileExt}`
         const filePath = `profiles/${fileName}`
 
         console.log('Starting image upload:', { fileName, filePath, size: profile_image.size })
@@ -135,15 +133,23 @@ export async function POST(req: NextRequest) {
 
         if (uploadError) {
           console.error('Image upload error:', uploadError)
+          // Continue without image - not critical
         } else {
           console.log('Image uploaded successfully:', uploadData)
-          // Get public URL - getPublicUrl returns the URL directly
-          const publicUrlResult = admin.storage
+          // Get public URL
+          const { data: publicUrlData } = admin.storage
             .from('math-club-images')
             .getPublicUrl(filePath)
 
-          profile_image_url = publicUrlResult.data?.publicUrl || null
-          console.log('Image URL retrieved:', profile_image_url)
+          profile_image_url = publicUrlData?.publicUrl || null
+          console.log('Profile image URL:', profile_image_url)
+          
+          // Verify URL is valid
+          if (profile_image_url) {
+            console.log('Image successfully uploaded and URL saved:', profile_image_url)
+          } else {
+            console.error('Failed to get public URL for image')
+          }
         }
       } catch (imageError) {
         console.error('Image processing error:', imageError)
@@ -152,6 +158,8 @@ export async function POST(req: NextRequest) {
     } else {
       console.log('No profile image provided or file size is 0')
     }
+
+    console.log('About to save user with profile_image_url:', profile_image_url)
 
     // Create user account - NOT APPROVED initially
     const { data: newUser, error: userError } = await admin

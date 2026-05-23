@@ -105,7 +105,7 @@ export function Footer() {
               <h3 className="text-lg font-bold text-neutral-900">Math Club</h3>
             </div>
             <p className="text-sm leading-6 text-neutral-600">
-              Empowering students through competitive programming and mathematics.
+              Empowering students through  and mathematics.
             </p>
           </div>
           <div>

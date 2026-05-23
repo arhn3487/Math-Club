@@ -136,7 +136,7 @@ export default function SignupPage() {
               className="mono-button mono-button--light w-full p-4 text-left"
             >
               <div className="font-bold text-neutral-950">Student Account</div>
-              <div className="text-sm text-neutral-600">Access courses, exams, and resources</div>
+              {/* <div className="text-sm text-neutral-600">Access courses, exams, and resources</div> */}
             </button>
             
             <button
@@ -144,7 +144,7 @@ export default function SignupPage() {
               className="mono-button mono-button--light w-full p-4 text-left"
             >
               <div className="font-bold text-neutral-950">Admin Account</div>
-              <div className="text-sm text-neutral-600">Manage content, exams, and users</div>
+              {/* <div className="text-sm text-neutral-600">Manage content, exams, and users</div> */}
             </button>
           </div>
 
@@ -190,7 +190,7 @@ export default function SignupPage() {
               onChange={handleChange}
               required
               className="mono-input"
-              placeholder="John Doe"
+              placeholder="Arafat Hasan"
             />
           </div>
 
@@ -203,7 +203,7 @@ export default function SignupPage() {
               onChange={handleChange}
               required
               className="mono-input"
-              placeholder="you@example.com"
+              placeholder="2023........mist.ac.bd"
             />
           </div>
 
@@ -218,7 +218,7 @@ export default function SignupPage() {
                   onChange={handleChange}
                   required
                   className="mono-input"
-                  placeholder="e.g., STU001"
+                  placeholder="2023............"
                 />
               </div>
 
@@ -251,7 +251,7 @@ export default function SignupPage() {
                 onChange={handleChange}
                 required
                 className="mono-input"
-                placeholder="e.g., ADM001"
+                placeholder="ADM001"
               />
             </div>
           )}
@@ -265,7 +265,7 @@ export default function SignupPage() {
               accept="image/jpeg,image/png,image/webp"
               className="mono-input"
             />
-            <p className="mt-1 text-xs text-neutral-500">JPEG, PNG or WebP. Max 5MB.</p>
+            <p className="mt-1 text-xs text-neutral-500">JPEG, PNG Max 1 MB.</p>
           </div>
 
           <div>

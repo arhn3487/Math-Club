@@ -222,27 +222,29 @@ export default function StudentResourcesPage() {
           </div>
         )}
 
-        <div className="mb-6 flex gap-4 border-b border-gray-300">
-          <button
-            onClick={() => { setActiveTab('videos'); setSelectedFolder(null) }}
-            className={`px-4 py-3 font-semibold transition ${
-              activeTab === 'videos'
-                ? 'text-indigo-600 border-b-2 border-indigo-600'
-                : 'text-gray-600 hover:text-gray-900'
-            }`}
-          >
-            📹 Videos
-          </button>
-          <button
-            onClick={() => { setActiveTab('github'); setSelectedFolder(null) }}
-            className={`px-4 py-3 font-semibold transition ${
-              activeTab === 'github'
-                ? 'text-indigo-600 border-b-2 border-indigo-600'
-                : 'text-gray-600 hover:text-gray-900'
-            }`}
-          >
-            🔗 GitHub Links
-          </button>
+        <div className="mb-6 rounded-full bg-neutral-100 p-1">
+          <div className="grid grid-cols-2 gap-1">
+            <button
+              onClick={() => { setActiveTab('videos'); setSelectedFolder(null) }}
+              className={`rounded-full px-4 py-3 text-sm font-semibold transition ${
+                activeTab === 'videos'
+                  ? 'bg-white text-red-600 shadow-sm'
+                  : 'text-neutral-500'
+              }`}
+            >
+              Videos
+            </button>
+            <button
+              onClick={() => { setActiveTab('github'); setSelectedFolder(null) }}
+              className={`rounded-full px-4 py-3 text-sm font-semibold transition ${
+                activeTab === 'github'
+                  ? 'bg-white text-red-600 shadow-sm'
+                  : 'text-neutral-500'
+              }`}
+            >
+              GitHub
+            </button>
+          </div>
         </div>
 
         <div className="mb-6">

@@ -147,7 +147,7 @@ export default function LoginPage() {
           />
           <h1 className="text-4xl font-black tracking-tight text-neutral-950">Math Club</h1>
           <p className="mt-2 text-sm font-medium tracking-[0.2em] uppercase text-neutral-500">
-            Competitive Programming Excellence
+            
           </p>
         </div>
 

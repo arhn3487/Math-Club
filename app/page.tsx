@@ -10,10 +10,10 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true)
 
   const navItems = [
-    { label: 'Batches', href: '/batches' },
-    { label: 'Courses', href: '/courses' },
-    { label: 'Contests', href: '/contests' },
-    { label: 'Achievements', href: '/achievements' },
+    //{ label: 'Batches', href: '/batches' },
+    //{ label: 'Courses', href: '/courses' },
+    //{ label: 'Contests', href: '/contests' },
+    //{ label: 'Achievements', href: '/achievements' },
     { label: 'Alumni', href: '/alumni' },
   ]
 
@@ -131,7 +131,7 @@ export default function Home() {
 
       <section className="mono-section">
         <div className="mono-container text-center">
-          <span className="mono-badge">Competitive Programming Club</span>
+          <span className="mono-badge">MIST Math Club</span>
           <h1 className="mt-8 text-5xl font-black tracking-tight text-neutral-950 md:text-7xl">
             HELLO PROGRAMMER,
             <span className="block mt-3">WELCOME TO</span>
@@ -238,7 +238,7 @@ export default function Home() {
           <div>
             <span className="text-lg font-black tracking-tight text-neutral-950">Math Club</span>
             <p className="mt-3 max-w-sm text-sm leading-7 text-neutral-600">
-              Competitive programming, mathematics, and a focused community with a calm monochrome interface.
+              MIST MATH CLUB, mathematics, and a focused community with a calm monochrome interface.
             </p>
           </div>
           <div className="grid gap-8 sm:grid-cols-2 md:grid-cols-3">

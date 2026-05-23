@@ -226,31 +226,6 @@ export default function AdminExamsPage() {
 
   return (
     <div className="min-h-screen bg-white text-neutral-900">
-      {/* Navigation */}
-      <nav className="border-b border-neutral-200 bg-white/95 backdrop-blur">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <Link href="/dashboard" className="flex items-center gap-3">
-            <img 
-              src="https://zxkeolkojkoenkszekiy.supabase.co/storage/v1/object/public/math-club-images/Math%20Club%20Logo/math%20club%20logo.png" 
-              alt="Math Club Logo" 
-              className="h-10 w-auto object-contain"
-            />
-            <span className="text-2xl font-bold text-indigo-600">Math Club</span>
-          </Link>
-          <button
-            onClick={() => {
-              localStorage.removeItem('auth_token')
-              localStorage.removeItem('user_type')
-              localStorage.removeItem('user_id')
-              router.push('/')
-            }}
-            className="rounded-full border border-neutral-300 bg-white px-4 py-2 text-sm font-semibold text-neutral-900 transition hover:border-neutral-400 hover:bg-neutral-50"
-          >
-            Logout
-          </button>
-        </div>
-      </nav>
-
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
@@ -286,7 +261,7 @@ export default function AdminExamsPage() {
                     name="exam_name"
                     value={formData.exam_name}
                     onChange={handleFormChange}
-                    placeholder="e.g., Competitive Programming Basics"
+                    placeholder="e.g., Competitive Programmin Basics"
                     className="w-full rounded-xl border border-neutral-300 bg-white px-4 py-3 text-neutral-900 outline-none transition placeholder:text-neutral-400 focus:border-neutral-900 focus:ring-2 focus:ring-neutral-900/10"
                     required
                   />

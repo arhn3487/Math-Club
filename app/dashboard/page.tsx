@@ -69,7 +69,7 @@ export default function DashboardPage() {
   const adminActions = [
     { label: 'User', href: '/admin/users', icon: '◫' },
     { label: 'Exams', href: '/admin/exams', icon: '✎' },
-    { label: 'Records', href: '/admin/class-recordings', icon: '◔' },
+    { label: 'Resources', href: '/admin/class-recordings', icon: '◔' },
     { label: 'Notices', href: '/admin/notices', icon: '◌' },
   ]
 
@@ -100,7 +100,7 @@ export default function DashboardPage() {
             ))}
           </div>
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-3 py-2">
+            <Link href="/profile" className="flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-3 py-2 transition hover:bg-neutral-50">
               {dashboardData.profileImage ? (
                 <img
                   src={dashboardData.profileImage}
@@ -112,7 +112,7 @@ export default function DashboardPage() {
                   {dashboardData.userId.charAt(0).toUpperCase()}
                 </div>
               )}
-            </div>
+            </Link>
             <button
               onClick={() => {
                 localStorage.removeItem('auth_token')
@@ -122,7 +122,8 @@ export default function DashboardPage() {
                 localStorage.removeItem('profile_image_url')
                 router.push('/')
               }}
-              className="rounded-full bg-neutral-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-neutral-800"
+              className="rounded-full bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700"
+              style={{ backgroundColor: '#dc2626', color: '#ffffff' }}
             >
               Logout
             </button>

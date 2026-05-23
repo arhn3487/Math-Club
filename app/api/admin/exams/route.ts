@@ -29,6 +29,14 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { exam_name, description, total_marks, duration_minutes, questions } = body
 
+    // Validate question marks do not exceed exam total_marks
+    if (questions && Array.isArray(questions) && questions.length > 0) {
+      const sumMarks = questions.reduce((s: number, q: any) => s + (Number(q.marks_per_question) || 0), 0)
+      if (sumMarks > Number(total_marks)) {
+        return NextResponse.json({ message: 'Total question marks cannot exceed the exam total marks' }, { status: 400 })
+      }
+    }
+
     const supabase = getSupabaseAdmin()
 
     // Create exam

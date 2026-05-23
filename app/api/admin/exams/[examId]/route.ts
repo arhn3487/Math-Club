@@ -27,8 +27,18 @@ export async function DELETE(request: NextRequest, { params }: { params: { examI
     }
 
     const supabase = getSupabaseAdmin()
-    const { error } = await supabase.from('exams').delete().eq('id', params.examId)
+    // Ensure the exam exists and was created by this admin
+    const { data: exam, error: fetchError } = await supabase.from('exams').select('id, created_by').eq('id', params.examId).single()
+    if (fetchError) {
+      console.error('Error fetching exam for delete:', fetchError)
+      return NextResponse.json({ message: 'Exam not found' }, { status: 404 })
+    }
 
+    if (String(exam.created_by) !== String(admin.user_id)) {
+      return NextResponse.json({ message: 'Forbidden: only the exam creator can delete this exam' }, { status: 403 })
+    }
+
+    const { error } = await supabase.from('exams').delete().eq('id', params.examId)
     if (error) throw error
 
     return NextResponse.json({ message: 'Exam deleted successfully' })

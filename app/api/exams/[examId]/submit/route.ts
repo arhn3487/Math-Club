@@ -84,8 +84,14 @@ export async function POST(
       if (saveError) throw saveError
     }
 
+    // Ensure totalMarks does not exceed exam.total_marks (data safety)
+    const examTotalMarks = Number(exam.total_marks) || 0
+    if (examTotalMarks > 0 && totalMarks > examTotalMarks) {
+      totalMarks = examTotalMarks
+    }
+
     // Create result record
-    const percentage = (totalMarks / exam.total_marks) * 100
+    const percentage = examTotalMarks > 0 ? (totalMarks / examTotalMarks) * 100 : 0
     const { error: resultError } = await supabase.from('exam_results').insert([
       {
         exam_id: parseInt(params.examId),
@@ -93,7 +99,7 @@ export async function POST(
         total_questions: questions.length,
         correct_answers: correctCount,
         total_marks_obtained: totalMarks,
-        total_marks: exam.total_marks,
+        total_marks: examTotalMarks,
         percentage: parseFloat(percentage.toFixed(2)),
         started_at: new Date().toISOString(),
         completed_at: new Date().toISOString(),

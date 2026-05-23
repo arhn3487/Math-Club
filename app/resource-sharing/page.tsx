@@ -1,38 +1,39 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
 interface Resource {
   id: number
   title: string
-  description: string
-  file_name?: string
-  file_url?: string
+  description?: string
   resource_url?: string
-  file_type?: string
+  thumbnail_url?: string
+  youtube_id?: string
   youtube_url?: string
-  folder_id?: number
-  created_at: string
+  resource_type?: string
+  folder_id?: number | null
   folder_name?: string
+  created_at?: string
 }
 
 interface Folder {
   id: number
   folder_name: string
-  description: string
+  description?: string
 }
 
 export default function StudentResourcesPage() {
   const router = useRouter()
-  const [resources, setResources] = useState<Resource[]>([])
+  const [videos, setVideos] = useState<Resource[]>([])
+  const [githubLinks, setGithubLinks] = useState<Resource[]>([])
   const [folders, setFolders] = useState<Folder[]>([])
+  const [activeTab, setActiveTab] = useState<'videos' | 'github'>('videos')
+  const [selectedFolder, setSelectedFolder] = useState<number | null>(null)
+  const [searchTerm, setSearchTerm] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [searchTerm, setSearchTerm] = useState('')
-  const [activeTab, setActiveTab] = useState<'videos' | 'files' | 'folders'>('videos')
-  const [selectedFolder, setSelectedFolder] = useState<number | null>(null)
 
   useEffect(() => {
     const token = localStorage.getItem('auth_token')
@@ -50,22 +51,81 @@ export default function StudentResourcesPage() {
   const fetchResources = async () => {
     try {
       setLoading(true)
-      const response = await fetch('/api/resource-sharing', {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
-        },
-      })
+      setError('')
+      const token = localStorage.getItem('auth_token')
 
-      if (!response.ok) {
+      const [videoRes, resourceRes] = await Promise.all([
+        fetch('/api/resource-sharing?type=video', {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        fetch('/api/resource-sharing?type=resource', {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+      ])
+
+      if (!videoRes.ok || !resourceRes.ok) {
         throw new Error('Failed to fetch resources')
       }
 
-      const data = await response.json()
-      const allResources = [
-        ...(data.videos || []),
-        ...(data.resources || []),
-      ]
-      setResources(allResources)
+      const videoData = await videoRes.json()
+      const resourceData = await resourceRes.json()
+
+      const extractYouTubeId = (url: string) => {
+        try {
+          const u = new URL(url)
+          if (u.hostname.includes('youtube.com')) {
+            return u.searchParams.get('v')
+          }
+          if (u.hostname === 'youtu.be') {
+            return u.pathname.slice(1)
+          }
+        } catch (e) {
+          return null
+        }
+        return null
+      }
+
+      const getThumbnailFor = (url: string | undefined) => {
+        if (!url) return null
+        const id = extractYouTubeId(String(url))
+        if (id) return `https://img.youtube.com/vi/${id}/hqdefault.jpg`
+        return null
+      }
+
+      const videoItems: Resource[] = (videoData.videos || []).map((v: any) => {
+        const src = v.resource_url || v.youtube_url
+        const youtubeId = src ? extractYouTubeId(src) : null
+        return {
+          id: v.id,
+          title: v.title,
+          description: v.description,
+          resource_url: src,
+          youtube_url: src,
+          youtube_id: youtubeId || undefined,
+          thumbnail_url: youtubeId ? `https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg` : undefined,
+          folder_id: v.folder_id ?? null,
+          folder_name: v.folder_name,
+          created_at: v.created_at,
+        }
+      })
+
+      const githubItems: Resource[] = (resourceData.resources || []).filter((r: any) => {
+        const url = String(r.resource_url || '').toLowerCase()
+        const type = String(r.resource_type || '').toLowerCase()
+        return url.includes('github.com') || type === 'github'
+      }).map((r: any) => ({
+        id: r.id,
+        title: r.title,
+        description: r.description,
+        resource_url: r.resource_url,
+        resource_type: r.resource_type,
+        folder_id: r.folder_id ?? null,
+        folder_name: r.folder_name,
+        created_at: r.created_at,
+      }))
+
+      setVideos(videoItems)
+      setGithubLinks(githubItems)
     } catch (err) {
       setError('Failed to load resources')
       console.error(err)
@@ -76,48 +136,40 @@ export default function StudentResourcesPage() {
 
   const fetchFolders = async () => {
     try {
+      const token = localStorage.getItem('auth_token')
       const response = await fetch('/api/resource-folders', {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       })
-      if (response.ok) {
-        const data = await response.json()
-        setFolders(data.folders || [])
-      }
+      if (!response.ok) return
+      const data = await response.json()
+      setFolders(data.folders || [])
     } catch (err) {
       console.error('Failed to fetch folders:', err)
     }
   }
 
-  const extractYouTubeId = (url: string) => {
-    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/
-    const match = url.match(regExp)
-    return match && match[2].length === 11 ? match[2] : null
-  }
+  const activeList = activeTab === 'videos' ? videos : githubLinks
 
-  const getResourceIcon = (resource: Resource) => {
-    if (resource.resource_url) return '🔗'
-    if (resource.youtube_url) return '📹'
-    if (resource.file_type === 'pdf') return '📄'
-    if (resource.file_type === 'doc') return '📑'
-    if (resource.file_type === 'image') return '🖼️'
-    return '📦'
-  }
+  const filteredItems = useMemo(() => {
+    return activeList.filter((item) => {
+      const matchesSearch =
+        item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        String(item.description || '').toLowerCase().includes(searchTerm.toLowerCase())
 
-  let filteredResources = resources.filter(r =>
-    r.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    r.description.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+      const matchesFolder = selectedFolder === null || item.folder_id === selectedFolder
+      return matchesSearch && matchesFolder
+    })
+  }, [activeList, searchTerm, selectedFolder])
 
-  if (activeTab === 'videos') {
-    filteredResources = filteredResources.filter(r => r.resource_url || r.youtube_url)
-  } else if (activeTab === 'files') {
-    filteredResources = filteredResources.filter(r => r.file_url && !r.youtube_url && !r.resource_url)
-    if (selectedFolder) {
-      filteredResources = filteredResources.filter(r => r.folder_id === selectedFolder)
-    }
-  }
+  const groupedByFolder = useMemo(() => {
+    const map: Record<string, Resource[]> = {}
+    filteredItems.forEach((item) => {
+      const key = item.folder_name || 'No Folder'
+      if (!map[key]) map[key] = []
+      map[key].push(item)
+    })
+    return map
+  }, [filteredItems])
 
   if (loading) {
     return (
@@ -132,21 +184,17 @@ export default function StudentResourcesPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Navigation */}
       <nav className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
           <Link href="/dashboard" className="flex items-center gap-3">
-            <img 
-              src="https://zxkeolkojkoenkszekiy.supabase.co/storage/v1/object/public/math-club-images/Math%20Club%20Logo/math%20club%20logo.png" 
-              alt="Math Club Logo" 
+            <img
+              src="https://zxkeolkojkoenkszekiy.supabase.co/storage/v1/object/public/math-club-images/Math%20Club%20Logo/math%20club%20logo.png"
+              alt="Math Club Logo"
               className="h-10 w-auto object-contain"
             />
             <span className="text-2xl font-bold text-indigo-600">Math Club</span>
           </Link>
           <div className="flex gap-4 items-center">
-            <Link href="/class-recordings" className="text-gray-600 hover:text-gray-900">
-              Class Resources
-            </Link>
             <button
               onClick={() => {
                 localStorage.removeItem('auth_token')
@@ -163,10 +211,9 @@ export default function StudentResourcesPage() {
       </nav>
 
       <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Shared Resources</h1>
-          <p className="text-gray-600 mt-2">Access study materials, videos, and files shared by your instructors</p>
+          <p className="text-gray-600 mt-2">Videos and GitHub PDF/resource links shared by admin</p>
         </div>
 
         {error && (
@@ -175,7 +222,6 @@ export default function StudentResourcesPage() {
           </div>
         )}
 
-        {/* Tabs */}
         <div className="mb-6 flex gap-4 border-b border-gray-300">
           <button
             onClick={() => { setActiveTab('videos'); setSelectedFolder(null) }}
@@ -188,178 +234,94 @@ export default function StudentResourcesPage() {
             📹 Videos
           </button>
           <button
-            onClick={() => { setActiveTab('files'); setSelectedFolder(null) }}
+            onClick={() => { setActiveTab('github'); setSelectedFolder(null) }}
             className={`px-4 py-3 font-semibold transition ${
-              activeTab === 'files'
+              activeTab === 'github'
                 ? 'text-indigo-600 border-b-2 border-indigo-600'
                 : 'text-gray-600 hover:text-gray-900'
             }`}
           >
-            📄 Study Materials
-          </button>
-          <button
-            onClick={() => { setActiveTab('folders'); setSelectedFolder(null) }}
-            className={`px-4 py-3 font-semibold transition ${
-              activeTab === 'folders'
-                ? 'text-indigo-600 border-b-2 border-indigo-600'
-                : 'text-gray-600 hover:text-gray-900'
-            }`}
-          >
-            📁 Folders
+            🔗 GitHub Links
           </button>
         </div>
 
-        {/* Search Bar */}
-        {(activeTab === 'videos' || activeTab === 'files') && (
+        <div className="mb-6">
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder={activeTab === 'videos' ? 'Search videos...' : 'Search GitHub links...'}
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+          />
+        </div>
+
+        {folders.length > 0 && (
           <div className="mb-8">
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search resources..."
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
-            />
+            <label className="block text-sm font-semibold text-gray-700 mb-3">Filter by Folder</label>
+            <div className="flex gap-2 flex-wrap">
+              <button
+                onClick={() => setSelectedFolder(null)}
+                className={`px-4 py-2 rounded text-sm font-semibold transition ${
+                  selectedFolder === null
+                    ? 'bg-indigo-600 text-white'
+                    : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
+                }`}
+              >
+                All
+              </button>
+              {folders.map((folder) => (
+                <button
+                  key={folder.id}
+                  onClick={() => setSelectedFolder(folder.id)}
+                  className={`px-4 py-2 rounded text-sm font-semibold transition ${
+                    selectedFolder === folder.id
+                      ? 'bg-indigo-600 text-white'
+                      : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
+                  }`}
+                >
+                  {folder.folder_name}
+                </button>
+              ))}
+            </div>
           </div>
         )}
 
-        {/* Folders Tab */}
-        {activeTab === 'folders' && (
-          <div>
-            {folders.length === 0 ? (
-              <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
-                <p className="text-gray-600">No folders available yet</p>
-              </div>
-            ) : (
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {folders.map(folder => (
-                  <div key={folder.id} className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition">
-                    <div className="text-4xl mb-3">📁</div>
-                    <h3 className="text-lg font-bold text-gray-900 mb-2">{folder.folder_name}</h3>
-                    <p className="text-gray-600 text-sm">{folder.description || 'No description'}</p>
-                  </div>
-                ))}
-              </div>
-            )}
+        {filteredItems.length === 0 ? (
+          <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
+            <p className="text-gray-600">No resources found.</p>
           </div>
-        )}
-
-        {/* Videos Tab */}
-        {activeTab === 'videos' && (
-          <div>
-            {filteredResources.length === 0 ? (
-              <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
-                <p className="text-gray-600">No videos available yet</p>
-              </div>
-            ) : (
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredResources.map(resource => {
-                  const videoId = resource.youtube_url ? extractYouTubeId(resource.youtube_url) : null
-                  return (
-                    <div key={`${resource.id}-video`} className="bg-white rounded-lg shadow overflow-hidden hover:shadow-lg transition">
-                      {videoId && (
-                        <a
-                          href={resource.youtube_url || resource.resource_url || '#'}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="block relative pb-[56.25%] h-0 overflow-hidden bg-gray-200"
-                        >
-                          <img
-                            src={`https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`}
-                            alt={resource.title}
-                            className="absolute top-0 left-0 w-full h-full object-cover"
-                          />
-                        </a>
+        ) : (
+          <div className="space-y-8">
+            {Object.entries(groupedByFolder).map(([folderName, items]) => (
+              <div key={folderName}>
+                <h4 className="text-lg font-semibold mb-4">{folderName}</h4>
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {items.map((item) => (
+                    <div key={`${activeTab}-${item.id}`} className="bg-white rounded-lg shadow p-4 hover:shadow-lg transition">
+                      {item.thumbnail_url ? (
+                        <img src={item.thumbnail_url} alt={item.title} className="w-full h-44 object-cover rounded mb-3" />
+                      ) : (
+                        <div className="w-full h-44 bg-gray-100 rounded mb-3 flex items-center justify-center text-gray-400">No preview</div>
                       )}
-                      <div className="p-4">
-                        <h3 className="font-bold text-gray-900 mb-2 line-clamp-2">{resource.title}</h3>
-                        <p className="text-gray-600 text-sm mb-3 line-clamp-2">{resource.description}</p>
-                        <div className="flex gap-2 pt-4">
-                          <a
-                            href={resource.youtube_url || resource.resource_url || '#'}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex-1 px-3 py-2 bg-indigo-600 text-white text-sm rounded text-center hover:bg-indigo-700"
-                          >
-                            Watch
-                          </a>
-                        </div>
-                      </div>
+                      <h3 className="font-bold text-gray-900 mb-2 line-clamp-2">{item.title}</h3>
+                      <p className="text-gray-600 text-sm mb-4 line-clamp-2">{item.description || 'No description'}</p>
+                      <a
+                        href={item.resource_url || '#'}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={`block w-full px-3 py-2 rounded text-center text-sm ${
+                          activeTab === 'videos'
+                            ? 'bg-red-600 hover:bg-red-700 text-white'
+                            : 'border border-indigo-600 text-indigo-600 hover:bg-indigo-50'
+                        }`}
+                      >
+                        {activeTab === 'videos' ? 'Watch' : 'Open Link'}
+                      </a>
                     </div>
-                  )
-                })}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Files Tab */}
-        {activeTab === 'files' && (
-          <div>
-            {folders.length > 0 && (
-              <div className="mb-6">
-                <label className="block text-sm font-semibold text-gray-700 mb-3">Filter by Folder</label>
-                <div className="flex gap-2 flex-wrap">
-                  <button
-                    onClick={() => setSelectedFolder(null)}
-                    className={`px-4 py-2 rounded text-sm font-semibold transition ${
-                      selectedFolder === null
-                        ? 'bg-indigo-600 text-white'
-                        : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
-                    }`}
-                  >
-                    All Files
-                  </button>
-                  {folders.map(folder => (
-                    <button
-                      key={folder.id}
-                      onClick={() => setSelectedFolder(folder.id)}
-                      className={`px-4 py-2 rounded text-sm font-semibold transition ${
-                        selectedFolder === folder.id
-                          ? 'bg-indigo-600 text-white'
-                          : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
-                      }`}
-                    >
-                      {folder.folder_name}
-                    </button>
                   ))}
                 </div>
               </div>
-            )}
-
-            {filteredResources.length === 0 ? (
-              <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
-                <p className="text-gray-600">No files available yet</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {filteredResources.map(resource => (
-                  <div key={`${resource.id}-file`} className="bg-white rounded-lg shadow p-4 hover:shadow-lg transition">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <span className="text-2xl">{getResourceIcon(resource)}</span>
-                          <div>
-                            <h3 className="font-bold text-gray-900">{resource.title}</h3>
-                            <p className="text-gray-600 text-sm">{resource.file_type?.toUpperCase() || 'File'}</p>
-                          </div>
-                        </div>
-                        {resource.description && (
-                          <p className="text-gray-600 text-sm ml-11">{resource.description}</p>
-                        )}
-                      </div>
-                      <a
-                        href={resource.file_url || '#'}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="px-4 py-2 bg-indigo-600 text-white rounded text-sm hover:bg-indigo-700 whitespace-nowrap ml-4"
-                      >
-                        Download
-                      </a>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+            ))}
           </div>
         )}
       </div>

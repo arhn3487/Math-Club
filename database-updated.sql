@@ -114,3 +114,11 @@ ON CONFLICT (user_id) DO NOTHING;
 
 -- Approve a student:
 -- UPDATE users SET is_approved = true, is_active = true WHERE id = 'student_id_here';
+
+-- ==================== DROP LEGACY RESOURCE TABLES ====================
+-- The project now uses `video_resources` and `shared_resources` for resource sharing.
+-- Remove older/duplicated tables that are no longer needed. Run these if you
+-- have already migrated any important data and are ready to delete legacy tables.
+
+DROP TABLE IF EXISTS resource_batch_access CASCADE;
+DROP TABLE IF EXISTS resources CASCADE;

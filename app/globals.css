@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  color-scheme: light;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -18,6 +22,13 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background: #ffffff;
+  color: #111111;
+}
+
+::selection {
+  background: #111111;
+  color: #ffffff;
 }
 
 .container {
@@ -67,4 +78,175 @@ body {
 
 .animate-fadeIn {
   animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes lightning-border {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@layer components {
+  .page-shell {
+    @apply min-h-screen bg-white text-neutral-900;
+  }
+
+  .mono-surface {
+    @apply bg-white border border-neutral-200 shadow-[0_10px_40px_rgba(17,17,17,0.08)];
+  }
+
+  .mono-card {
+    @apply rounded-2xl border border-neutral-200 bg-white shadow-sm transition duration-300;
+  }
+
+  .mono-card-hover {
+    @apply hover:-translate-y-1 hover:border-neutral-300 hover:shadow-lg;
+  }
+
+  .mono-badge {
+    @apply inline-flex items-center rounded-full border border-neutral-300 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-neutral-600;
+  }
+
+  .mono-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    border-radius: 9999px;
+    border: 1px solid rgba(17, 17, 17, 0.14);
+    background: #111111;
+    color: #ffffff;
+    cursor: pointer;
+    text-decoration: none;
+    transition:
+      transform 180ms ease,
+      box-shadow 180ms ease,
+      border-color 180ms ease,
+      background 180ms ease,
+      color 180ms ease;
+  }
+
+  .mono-button::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    padding: 1px;
+    background: conic-gradient(
+      from 0deg,
+      transparent 0deg,
+      transparent 28deg,
+      rgba(255, 255, 255, 0.95) 42deg,
+      transparent 58deg,
+      rgba(255, 255, 255, 0.35) 120deg,
+      transparent 160deg,
+      rgba(255, 255, 255, 0.9) 220deg,
+      transparent 250deg,
+      transparent 360deg
+    );
+    opacity: 0;
+    animation: lightning-border 1.1s linear infinite;
+    pointer-events: none;
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+  }
+
+  .mono-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 16px 32px rgba(17, 17, 17, 0.12);
+  }
+
+  .mono-button:hover::before {
+    opacity: 1;
+  }
+
+  .mono-button--light {
+    background: #ffffff;
+    color: #111111;
+    border-color: rgba(17, 17, 17, 0.18);
+  }
+
+  .mono-button--outline {
+    background: #ffffff;
+    color: #111111;
+    border-color: rgba(17, 17, 17, 0.22);
+  }
+
+  .mono-nav-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    border-radius: 9999px;
+    border: 1px solid rgba(17, 17, 17, 0.12);
+    background: #ffffff;
+    color: #111111;
+    text-decoration: none;
+    transition:
+      transform 180ms ease,
+      box-shadow 180ms ease,
+      border-color 180ms ease,
+      background 180ms ease,
+      color 180ms ease;
+  }
+
+  .mono-nav-button::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    padding: 1px;
+    background: conic-gradient(
+      from 0deg,
+      transparent 0deg,
+      transparent 24deg,
+      rgba(17, 17, 17, 0.98) 40deg,
+      transparent 56deg,
+      rgba(17, 17, 17, 0.32) 118deg,
+      transparent 156deg,
+      rgba(17, 17, 17, 0.92) 220deg,
+      transparent 248deg,
+      transparent 360deg
+    );
+    opacity: 0;
+    animation: lightning-border 1.05s linear infinite;
+    pointer-events: none;
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+  }
+
+  .mono-nav-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 24px rgba(17, 17, 17, 0.08);
+  }
+
+  .mono-nav-button:hover::before {
+    opacity: 1;
+  }
+
+  .mono-input {
+    @apply w-full rounded-xl border border-neutral-300 bg-white px-4 py-3 text-neutral-900 outline-none transition placeholder:text-neutral-400 focus:border-neutral-900 focus:ring-2 focus:ring-neutral-900/10;
+  }
+
+  .mono-section {
+    @apply px-4 py-16 md:py-20;
+  }
+
+  .mono-container {
+    @apply mx-auto w-full max-w-6xl;
+  }
 }

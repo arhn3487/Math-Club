@@ -112,6 +112,29 @@ CREATE TABLE class_recordings (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+-- ==================== RESOURCE SHARING (folders + resources) ====================
+CREATE TABLE resource_folders (
+  id SERIAL PRIMARY KEY,
+  folder_name VARCHAR(255) NOT NULL,
+  created_by VARCHAR(50) NOT NULL REFERENCES users(user_id),
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE resources (
+  id SERIAL PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  description TEXT,
+  resource_type VARCHAR(20) NOT NULL CHECK (resource_type IN ('video','link')),
+  resource_url TEXT NOT NULL,
+  folder_id INTEGER REFERENCES resource_folders(id) ON DELETE SET NULL,
+  batch_year INTEGER REFERENCES batches(batch_year),
+  added_by VARCHAR(50) NOT NULL REFERENCES users(user_id),
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
 -- ==================== NOTICES TABLE ====================
 CREATE TABLE notices (
   id SERIAL PRIMARY KEY,
@@ -143,6 +166,8 @@ CREATE INDEX idx_exam_results_exam_id ON exam_results(exam_id);
 CREATE INDEX idx_exam_results_user_id ON exam_results(user_id);
 CREATE INDEX idx_class_recordings_batch_year ON class_recordings(batch_year);
 CREATE INDEX idx_class_recordings_uploaded_by ON class_recordings(uploaded_by);
+CREATE INDEX idx_resources_folder_id ON resources(folder_id);
+CREATE INDEX idx_resources_added_by ON resources(added_by);
 CREATE INDEX idx_notices_created_by ON notices(created_by);
 CREATE INDEX idx_notices_created_at ON notices(created_at);
 

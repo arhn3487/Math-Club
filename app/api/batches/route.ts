@@ -6,6 +6,7 @@ import {
   updateData,
   deleteData,
 } from '@/lib/db'
+import { getSupabaseAdmin } from '@/lib/supabaseClient'
 import { Batch } from '@/types'
 
 export async function GET(req: NextRequest) {
@@ -18,11 +19,27 @@ export async function GET(req: NextRequest) {
       return NextResponse.json(batch)
     }
 
+    // Try Supabase first for resource sharing batches
+    try {
+      const supabase = getSupabaseAdmin()
+      const { data: supabaseBatches, error } = await supabase
+        .from('batches')
+        .select('*')
+        .order('batch_year', { ascending: true })
+
+      if (!error && supabaseBatches) {
+        return NextResponse.json({ batches: supabaseBatches })
+      }
+    } catch (supabaseErr) {
+      console.log('Supabase fetch failed, falling back to db')
+    }
+
+    // Fallback to old database
     const batches = await fetchData<Batch>('batches', undefined, {
       orderBy: 'created_at',
     })
 
-    return NextResponse.json(batches)
+    return NextResponse.json({ batches })
   } catch (error) {
     return NextResponse.json(
       { error: 'Failed to fetch batches' },

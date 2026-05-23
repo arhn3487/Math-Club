@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import { Navbar, Footer } from '@/components/layout/Navigation'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -14,7 +13,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="bg-gray-50">
+      <body className="bg-white text-neutral-900 antialiased">
         <main className="min-h-screen">{children}</main>
       </body>
     </html>

@@ -22,12 +22,12 @@ export function Button({
   fullWidth = false,
 }: ButtonProps) {
   const baseStyles =
-    'px-4 py-2 rounded-lg font-semibold transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed'
+    'mono-button inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-50'
 
   const variantStyles = {
-    primary: 'bg-blue-600 text-white hover:bg-blue-700',
-    secondary: 'bg-gray-300 text-gray-800 hover:bg-gray-400',
-    danger: 'bg-red-600 text-white hover:bg-red-700',
+    primary: 'mono-button',
+    secondary: 'mono-button--light',
+    danger: 'mono-button bg-neutral-950 text-white hover:bg-neutral-800',
   }
 
   return (
@@ -70,7 +70,7 @@ export function Input({
   return (
     <div className="flex flex-col gap-2">
       {label && (
-        <label className="text-sm font-semibold text-gray-700">{label}</label>
+        <label className="text-sm font-semibold text-neutral-700">{label}</label>
       )}
       <input
         type={type}
@@ -79,9 +79,7 @@ export function Input({
         onChange={onChange}
         disabled={disabled}
         required={required}
-        className={`px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-          error ? 'border-red-500' : ''
-        } ${className}`}
+        className={`mono-input ${error ? 'border-red-500' : ''} ${className}`}
       />
       {error && <span className="text-sm text-red-500">{error}</span>}
     </div>
@@ -97,7 +95,7 @@ interface CardProps {
 export function Card({ children, className = '', onClick }: CardProps) {
   return (
     <div
-      className={`bg-white rounded-lg shadow-md p-6 ${className}`}
+      className={`mono-card p-6 ${className}`}
       onClick={onClick}
     >
       {children}
@@ -112,8 +110,8 @@ interface LoadingProps {
 export function Loading({ message = 'Loading...' }: LoadingProps) {
   return (
     <div className="flex items-center justify-center gap-3 p-8">
-      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-      <span className="text-gray-600">{message}</span>
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-neutral-900"></div>
+      <span className="text-neutral-600">{message}</span>
     </div>
   )
 }
@@ -125,9 +123,9 @@ interface ErrorProps {
 
 export function Error({ message, onRetry }: ErrorProps) {
   return (
-    <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-      <p className="text-red-600 font-semibold mb-2">Error</p>
-      <p className="text-red-500 mb-4">{message}</p>
+    <div className="rounded-2xl border border-red-200 bg-red-50 p-4">
+      <p className="mb-2 font-semibold text-red-600">Error</p>
+      <p className="mb-4 text-red-500">{message}</p>
       {onRetry && <Button onClick={onRetry}>Retry</Button>}
     </div>
   )
@@ -140,15 +138,15 @@ interface BadgeProps {
 
 export function Badge({ children, variant = 'primary' }: BadgeProps) {
   const variantStyles = {
-    primary: 'bg-blue-100 text-blue-800',
-    success: 'bg-green-100 text-green-800',
-    warning: 'bg-yellow-100 text-yellow-800',
-    danger: 'bg-red-100 text-red-800',
+    primary: 'border-neutral-300 bg-neutral-50 text-neutral-800',
+    success: 'border-neutral-300 bg-white text-neutral-800',
+    warning: 'border-neutral-300 bg-neutral-50 text-neutral-700',
+    danger: 'border-neutral-900 bg-neutral-900 text-white',
   }
 
   return (
     <span
-      className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${variantStyles[variant]}`}
+      className={`inline-flex items-center rounded-full border px-3 py-1 text-sm font-semibold ${variantStyles[variant]}`}
     >
       {children}
     </span>

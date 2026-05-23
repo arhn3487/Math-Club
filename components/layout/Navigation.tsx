@@ -7,47 +7,50 @@ export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   const navItems = [
-    { label: 'Home', href: '/' },
-    { label: 'Batches', href: '/batches' },
-    { label: 'Courses', href: '/courses' },
-    { label: 'Contests', href: '/contests' },
-    { label: 'Achievements', href: '/achievements' },
-    { label: 'Alumni', href: '/alumni' },
-    { label: 'Dashboard', href: '/dashboard' },
+    { label: 'Home', href: '/', icon: '⌂' },
+    { label: 'Batches', href: '/batches', icon: '▦' },
+    { label: 'Courses', href: '/courses', icon: '◫' },
+    { label: 'Contests', href: '/contests', icon: '◌' },
+    { label: 'Achievements', href: '/achievements', icon: '✦' },
+    { label: 'Alumni', href: '/alumni', icon: '◉' },
+    { label: 'Dashboard', href: '/dashboard', icon: '▣' },
   ]
 
   return (
-    <nav className="bg-blue-600 text-white shadow-lg">
-      <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+    <nav className="border-b border-neutral-200 bg-white/95 text-neutral-900 shadow-sm backdrop-blur">
+      <div className="mx-auto grid max-w-7xl grid-cols-[auto,1fr,auto] items-center gap-4 px-4 py-4">
         <Link href="/" className="flex items-center gap-3">
           <img 
-            src="https://zxkeolkojkoenkszekiy.supabase.co/storage/v1/object/public/math-club-images/Math%20Club%20Logo/math%20club%20logo%202.png" 
+            src="https://zxkeolkojkoenkszekiy.supabase.co/storage/v1/object/public/math-club-images/Math%20Club%20Logo/math%20club%20logo.png" 
             alt="Math Club Logo" 
             className="h-10 w-auto object-contain"
           />
-          <span className="text-2xl font-bold">Math Club</span>
         </Link>
 
         {/* Desktop Menu */}
-        <div className="hidden md:flex gap-6">
+        <div className="hidden items-center justify-center gap-2 lg:flex">
           {navItems.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className="hover:text-blue-200 transition-colors"
+              className="flex items-center gap-2 rounded-full px-3 py-2 text-sm font-semibold text-neutral-900 transition hover:bg-neutral-100"
             >
+              <span className="flex h-5 w-5 items-center justify-center rounded-full border border-neutral-300 text-[10px] font-bold text-neutral-500">
+                {item.icon}
+              </span>
               {item.label}
             </Link>
           ))}
         </div>
 
-        {/* Mobile Menu Button */}
+        <div className="justify-self-end lg:hidden" />
+
         <button
-          className="md:hidden"
+          className="rounded-full border border-neutral-200 p-2 lg:hidden"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
         >
           <svg
-            className="w-6 h-6"
+            className="h-6 w-6"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -64,14 +67,17 @@ export function Navbar() {
 
       {/* Mobile Menu */}
       {isMenuOpen && (
-        <div className="md:hidden bg-blue-700 px-4 py-4 space-y-2">
+        <div className="border-t border-neutral-200 bg-white px-4 py-4 md:hidden">
           {navItems.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className="block hover:text-blue-200 transition-colors py-2"
+              className="flex items-center gap-2 py-2 text-sm font-semibold text-neutral-900 transition-colors hover:text-neutral-950"
               onClick={() => setIsMenuOpen(false)}
             >
+              <span className="flex h-5 w-5 items-center justify-center rounded-full border border-neutral-300 text-[10px] font-bold text-neutral-500">
+                {item.icon}
+              </span>
               {item.label}
             </Link>
           ))}
@@ -86,49 +92,49 @@ export function Footer() {
   const currentYear = new Date().getFullYear()
 
   return (
-    <footer className="bg-gray-800 text-white py-8 mt-12">
-      <div className="max-w-7xl mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+    <footer className="border-t border-neutral-200 bg-white py-10 mt-12">
+      <div className="mx-auto max-w-7xl px-4">
+        <div className="mb-8 grid grid-cols-1 gap-8 md:grid-cols-3">
           <div>
             <div className="flex items-center gap-2 mb-4">
               <img 
-                src="https://zxkeolkojkoenkszekiy.supabase.co/storage/v1/object/public/math-club-images/Math%20Club%20Logo/math%20club%20logo%202.png" 
+                src="https://zxkeolkojkoenkszekiy.supabase.co/storage/v1/object/public/math-club-images/Math%20Club%20Logo/math%20club%20logo.png" 
                 alt="Math Club Logo" 
                 className="h-10 w-auto object-contain"
               />
-              <h3 className="text-lg font-bold">Math Club</h3>
+              <h3 className="text-lg font-bold text-neutral-900">Math Club</h3>
             </div>
-            <p className="text-gray-400">
+            <p className="text-sm leading-6 text-neutral-600">
               Empowering students through competitive programming and mathematics.
             </p>
           </div>
           <div>
-            <h3 className="text-lg font-bold mb-4">Quick Links</h3>
-            <ul className="space-y-2 text-gray-400">
+            <h3 className="mb-4 text-lg font-bold text-neutral-900">Quick Links</h3>
+            <ul className="space-y-2 text-sm text-neutral-600">
               <li>
-                <Link href="/batches" className="hover:text-white transition-colors">
+                <Link href="/batches" className="transition-colors hover:text-neutral-950">
                   Batches
                 </Link>
               </li>
               <li>
-                <Link href="/courses" className="hover:text-white transition-colors">
+                <Link href="/courses" className="transition-colors hover:text-neutral-950">
                   Courses
                 </Link>
               </li>
               <li>
-                <Link href="/contests" className="hover:text-white transition-colors">
+                <Link href="/contests" className="transition-colors hover:text-neutral-950">
                   Contests
                 </Link>
               </li>
             </ul>
           </div>
           <div>
-            <h3 className="text-lg font-bold mb-4">Contact</h3>
-            <p className="text-gray-400">Email: info@mathclub.com</p>
-            <p className="text-gray-400">Phone: +1 (555) 123-4567</p>
+            <h3 className="mb-4 text-lg font-bold text-neutral-900">Contact</h3>
+            <p className="text-sm text-neutral-600">Email: info@mathclub.com</p>
+            <p className="text-sm text-neutral-600">Phone: +1 (555) 123-4567</p>
           </div>
         </div>
-        <div className="border-t border-gray-700 pt-8 text-center text-gray-400">
+        <div className="border-t border-neutral-200 pt-8 text-center text-sm text-neutral-500">
           <p>&copy; {currentYear} Math Club. All rights reserved.</p>
         </div>
       </div>

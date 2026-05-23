@@ -30,6 +30,7 @@ export default function AdminClassRecordingsPage() {
   })
   const [submitting, setSubmitting] = useState(false)
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null)
+  const [batchScrollOffset, setBatchScrollOffset] = useState(0)
 
   useEffect(() => {
     const token = localStorage.getItem('auth_token')
@@ -164,23 +165,28 @@ export default function AdminClassRecordingsPage() {
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
           <Link href="/dashboard" className="flex items-center gap-3">
             <img 
-              src="https://zxkeolkojkoenkszekiy.supabase.co/storage/v1/object/public/math-club-images/Math%20Club%20Logo/math%20club%20logo%202.png" 
+              src="https://zxkeolkojkoenkszekiy.supabase.co/storage/v1/object/public/math-club-images/Math%20Club%20Logo/math%20club%20logo.png" 
               alt="Math Club Logo" 
               className="h-10 w-auto object-contain"
             />
             <span className="text-2xl font-bold text-indigo-600">Math Club</span>
           </Link>
-          <button
-            onClick={() => {
-              localStorage.removeItem('auth_token')
-              localStorage.removeItem('user_type')
-              localStorage.removeItem('user_id')
-              router.push('/')
-            }}
-            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-          >
-            Logout
-          </button>
+          <div className="flex gap-4 items-center">
+            <Link href="/admin/resource-sharing" className="text-gray-600 hover:text-gray-900">
+              Shared Resources
+            </Link>
+            <button
+              onClick={() => {
+                localStorage.removeItem('auth_token')
+                localStorage.removeItem('user_type')
+                localStorage.removeItem('user_id')
+                router.push('/')
+              }}
+              className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+            >
+              Logout
+            </button>
+          </div>
         </div>
       </nav>
 
@@ -188,14 +194,14 @@ export default function AdminClassRecordingsPage() {
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Class Recordings</h1>
-            <p className="text-gray-600 mt-2">Manage video recordings for students</p>
+            <h1 className="text-3xl font-bold text-gray-900">Class Resources</h1>
+            <p className="text-gray-600 mt-2">Manage video recordings and resources for students</p>
           </div>
           <button
             onClick={() => setShowForm(!showForm)}
             className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
           >
-            {showForm ? 'Cancel' : '+ Add Recording'}
+            {showForm ? 'Cancel' : '+ Add Resource'}
           </button>
         </div>
 
@@ -208,7 +214,7 @@ export default function AdminClassRecordingsPage() {
         {/* Add Recording Form */}
         {showForm && (
           <div className="bg-white rounded-lg shadow mb-8 p-6">
-            <h2 className="text-2xl font-bold mb-6 text-gray-900">Add Class Recording</h2>
+            <h2 className="text-2xl font-bold mb-6 text-gray-900">Add Class Resource</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Title *</label>
@@ -246,19 +252,54 @@ export default function AdminClassRecordingsPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Batch Year (Optional)</label>
-                <select
-                  value={formData.batch_year}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, batch_year: e.target.value }))}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
-                >
-                  <option value="">All Batches</option>
-                  {batches.map((batch) => (
-                    <option key={batch} value={batch}>
-                      {batch}
-                    </option>
-                  ))}
-                </select>
+                <label className="block text-sm font-medium text-gray-700 mb-3">Batch Year (Optional)</label>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setBatchScrollOffset(Math.max(0, batchScrollOffset - 4))}
+                    disabled={batchScrollOffset === 0}
+                    className="px-3 py-2 bg-gray-200 disabled:opacity-50 rounded hover:bg-gray-300"
+                  >
+                    ←
+                  </button>
+                  <div className="flex-1 overflow-hidden">
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setFormData((prev) => ({ ...prev, batch_year: '' }))}
+                        className={`px-4 py-2 rounded whitespace-nowrap ${
+                          formData.batch_year === '' 
+                            ? 'bg-indigo-600 text-white' 
+                            : 'bg-gray-200 hover:bg-gray-300'
+                        }`}
+                      >
+                        All Batches
+                      </button>
+                      {batches.slice(batchScrollOffset, batchScrollOffset + 4).map((batch) => (
+                        <button
+                          key={batch}
+                          type="button"
+                          onClick={() => setFormData((prev) => ({ ...prev, batch_year: batch.toString() }))}
+                          className={`px-4 py-2 rounded whitespace-nowrap ${
+                            formData.batch_year === batch.toString()
+                              ? 'bg-indigo-600 text-white'
+                              : 'bg-gray-200 hover:bg-gray-300'
+                          }`}
+                        >
+                          {batch}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setBatchScrollOffset(Math.min(batches.length - 4, batchScrollOffset + 4))}
+                    disabled={batchScrollOffset + 4 >= batches.length}
+                    className="px-3 py-2 bg-gray-200 disabled:opacity-50 rounded hover:bg-gray-300"
+                  >
+                    →
+                  </button>
+                </div>
               </div>
 
               <div className="flex gap-4">
@@ -274,7 +315,7 @@ export default function AdminClassRecordingsPage() {
                   disabled={submitting}
                   className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50"
                 >
-                  {submitting ? 'Adding...' : 'Add Recording'}
+                  {submitting ? 'Adding...' : 'Add Resource'}
                 </button>
               </div>
             </form>

@@ -42,10 +42,10 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="page-shell flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading dashboard...</p>
+          <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-b-2 border-neutral-900"></div>
+          <p className="text-sm font-medium tracking-[0.2em] text-neutral-500 uppercase">Loading dashboard</p>
         </div>
       </div>
     )
@@ -58,37 +58,60 @@ export default function DashboardPage() {
   const isStudent = dashboardData.userType === 'student'
   const isAdmin = dashboardData.userType === 'admin'
 
+  const studentActions = [
+    { label: 'Exams', href: '/exams', icon: '⌂' },
+    { label: 'Recordings', href: '/class-recordings', icon: '◔' },
+    { label: 'Resources', href: '/resource-sharing', icon: '▣' },
+    { label: 'Alumni', href: '/alumni', icon: '◉' },
+    { label: 'Notices', href: '/notices', icon: '◌' },
+  ]
+
+  const adminActions = [
+    { label: 'User', href: '/admin/users', icon: '◫' },
+    { label: 'Exams', href: '/admin/exams', icon: '✎' },
+    { label: 'Records', href: '/admin/class-recordings', icon: '◔' },
+    { label: 'Notices', href: '/admin/notices', icon: '◌' },
+  ]
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="page-shell">
       {/* Navigation */}
-      <nav className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+      <nav className="border-b border-neutral-200 bg-white/95 shadow-sm backdrop-blur">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4">
           <Link href="/" className="flex items-center gap-3">
             <img 
-              src="https://zxkeolkojkoenkszekiy.supabase.co/storage/v1/object/public/math-club-images/Math%20Club%20Logo/math%20club%20logo%202.png" 
+              src="https://zxkeolkojkoenkszekiy.supabase.co/storage/v1/object/public/math-club-images/Math%20Club%20Logo/math%20club%20logo.png" 
               alt="Math Club Logo" 
               className="h-10 w-auto object-contain"
             />
-            <span className="text-2xl font-bold text-indigo-600">Math Club</span>
           </Link>
-          <div className="flex items-center gap-6">
-            {/* Profile Section */}
-            <div className="flex items-center gap-3">
+          <div className="hidden flex-1 items-center justify-center gap-8 lg:flex">
+            {(isStudent ? studentActions : adminActions).map((action) => (
+              <Link
+                key={action.href}
+                href={action.href}
+                className="mono-nav-button group inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-semibold text-neutral-900 transition"
+              >
+                <span className="flex h-5 w-5 items-center justify-center rounded-full border border-neutral-300 text-[10px] font-bold text-neutral-900 transition group-hover:border-neutral-900 group-hover:text-neutral-900">
+                  {action.icon}
+                </span>
+                <span>{action.label}</span>
+              </Link>
+            ))}
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-3 py-2">
               {dashboardData.profileImage ? (
-                <img 
-                  src={dashboardData.profileImage} 
-                  alt="Profile" 
-                  className="w-10 h-10 rounded-full object-cover border-2 border-indigo-600"
+                <img
+                  src={dashboardData.profileImage}
+                  alt="Profile"
+                  className="h-8 w-8 rounded-full object-cover border border-neutral-300"
                 />
               ) : (
-                <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-sm font-bold text-indigo-600 border-2 border-indigo-600">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full border border-neutral-300 bg-neutral-100 text-sm font-bold text-neutral-900">
                   {dashboardData.userId.charAt(0).toUpperCase()}
                 </div>
               )}
-              <div>
-                <div className="text-sm font-medium text-gray-700">{dashboardData.userId}</div>
-                <div className="text-xs text-gray-500 capitalize">{dashboardData.userType}</div>
-              </div>
             </div>
             <button
               onClick={() => {
@@ -99,7 +122,7 @@ export default function DashboardPage() {
                 localStorage.removeItem('profile_image_url')
                 router.push('/')
               }}
-              className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+              className="rounded-full bg-neutral-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-neutral-800"
             >
               Logout
             </button>
@@ -107,139 +130,32 @@ export default function DashboardPage() {
         </div>
       </nav>
 
-      <div className="max-w-7xl mx-auto px-4 py-12">
-        {/* Profile Card */}
-        <div className="mb-12 bg-white rounded-lg shadow p-8 flex items-center gap-8">
-          {dashboardData.profileImage ? (
-            <img 
-              src={dashboardData.profileImage} 
-              alt="Profile" 
-              className="w-24 h-24 rounded-lg object-cover border-4 border-indigo-600"
-            />
-          ) : (
-            <div className="w-24 h-24 rounded-lg bg-indigo-100 flex items-center justify-center text-3xl font-bold text-indigo-600 border-4 border-indigo-600">
-              {dashboardData.userId.charAt(0).toUpperCase()}
-            </div>
-          )}
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900">Welcome to Math Club!</h2>
-            <p className="text-gray-600 mt-1">
-              {isStudent
-                ? 'Access exams, class recordings, and connect with your batchmates'
-                : 'Manage users, exams, class recordings, and announcements'}
-            </p>
-          </div>
+      <div className="mx-auto flex min-h-[calc(100vh-5.5rem)] max-w-7xl flex-col items-center justify-center px-4 py-16 text-center">
+        <p className="text-4xl font-black uppercase tracking-tight text-neutral-900 sm:text-6xl lg:text-7xl">
+          HELLO <span className="text-[#7a4d35]">MEMBER,</span>
+        </p>
+        <h1 className="mt-4 text-3xl font-black uppercase tracking-tight text-neutral-900 sm:text-5xl lg:text-6xl">
+          Welcome to
+        </h1>
+
+        <div className="mt-10 flex items-center justify-center">
+          <img
+            src="https://zxkeolkojkoenkszekiy.supabase.co/storage/v1/object/public/math-club-images/Math%20Club%20Logo/math%20club%20logo.png"
+            alt="Math Club Logo"
+            className="w-[19rem] max-w-[80vw] object-contain sm:w-[24rem] lg:w-[30rem]"
+          />
         </div>
 
-        {/* Student Dashboard */}
-        {isStudent && (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <Link href="/exams">
-              <div className="bg-white rounded-lg shadow p-8 hover:shadow-lg transition cursor-pointer">
-                <div className="text-5xl mb-4">📝</div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">Exams</h2>
-                <p className="text-gray-600">Take exams and view your results with instant scoring</p>
-              </div>
-            </Link>
-
-            <Link href="/class-recordings">
-              <div className="bg-white rounded-lg shadow p-8 hover:shadow-lg transition cursor-pointer">
-                <div className="text-5xl mb-4">🎥</div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">Class Recordings</h2>
-                <p className="text-gray-600">Watch recorded class sessions and tutorials</p>
-              </div>
-            </Link>
-
-            <Link href="/alumni">
-              <div className="bg-white rounded-lg shadow p-8 hover:shadow-lg transition cursor-pointer">
-                <div className="text-5xl mb-4">👥</div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">Batchmates</h2>
-                <p className="text-gray-600">Connect with members of your batch</p>
-              </div>
-            </Link>
-
-            <Link href="/notices">
-              <div className="bg-white rounded-lg shadow p-8 hover:shadow-lg transition cursor-pointer">
-                <div className="text-5xl mb-4">📢</div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">Notices</h2>
-                <p className="text-gray-600">Stay updated with latest announcements and events</p>
-              </div>
-            </Link>
-          </div>
-        )}
-
-        {/* Admin Dashboard */}
-        {isAdmin && (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <Link href="/admin/users">
-              <div className="bg-white rounded-lg shadow p-8 hover:shadow-lg transition cursor-pointer">
-                <div className="text-5xl mb-4">👤</div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">User Management</h2>
-                <p className="text-gray-600">Manage students and admins, filter by batch</p>
-              </div>
-            </Link>
-
-            <Link href="/admin/exams">
-              <div className="bg-white rounded-lg shadow p-8 hover:shadow-lg transition cursor-pointer">
-                <div className="text-5xl mb-4">✏️</div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">Exam Management</h2>
-                <p className="text-gray-600">Create exams, add questions, and view results</p>
-              </div>
-            </Link>
-
-            <Link href="/admin/class-recordings">
-              <div className="bg-white rounded-lg shadow p-8 hover:shadow-lg transition cursor-pointer">
-                <div className="text-5xl mb-4">🎬</div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">Class Recordings</h2>
-                <p className="text-gray-600">Upload and manage YouTube class recordings</p>
-              </div>
-            </Link>
-
-            <Link href="/admin/notices">
-              <div className="bg-white rounded-lg shadow p-8 hover:shadow-lg transition cursor-pointer">
-                <div className="text-5xl mb-4">📣</div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">Notices</h2>
-                <p className="text-gray-600">Post announcements and event notices</p>
-              </div>
-            </Link>
-
-            <Link href="/admin/approvals">
-              <div className="bg-white rounded-lg shadow p-8 hover:shadow-lg transition cursor-pointer">
-                <div className="text-5xl mb-4">✅</div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">Approve Students</h2>
-                <p className="text-gray-600">Review and approve pending student accounts</p>
-              </div>
-            </Link>
-
-            <Link href="/alumni">
-              <div className="bg-white rounded-lg shadow p-8 hover:shadow-lg transition cursor-pointer">
-                <div className="text-5xl mb-4">👥</div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">All Members</h2>
-                <p className="text-gray-600">View and manage all community members</p>
-              </div>
-            </Link>
-          </div>
-        )}
-
-        {/* Quick Stats */}
-        <div className="mt-16 grid md:grid-cols-4 gap-6">
-          <div className="bg-white rounded-lg shadow p-6 text-center">
-            <div className="text-3xl font-bold text-indigo-600">500+</div>
-            <p className="text-gray-600 mt-2">Active Members</p>
-          </div>
-          <div className="bg-white rounded-lg shadow p-6 text-center">
-            <div className="text-3xl font-bold text-indigo-600">50+</div>
-            <p className="text-gray-600 mt-2">Available Exams</p>
-          </div>
-          <div className="bg-white rounded-lg shadow p-6 text-center">
-            <div className="text-3xl font-bold text-indigo-600">100+</div>
-            <p className="text-gray-600 mt-2">Class Recordings</p>
-          </div>
-          <div className="bg-white rounded-lg shadow p-6 text-center">
-            <div className="text-3xl font-bold text-indigo-600">20+</div>
-            <p className="text-gray-600 mt-2">Batches</p>
-          </div>
-        </div>
+        <p className="mt-12 max-w-4xl text-lg font-semibold leading-8 text-neutral-500 sm:text-2xl">
+          {isStudent
+            ? 'A community for problem solving, growth, and collaborative learning.'
+            : 'A place to manage members, exams, recordings, and announcements with ease.'}
+        </p>
+        <p className="mt-3 max-w-4xl text-base leading-7 text-neutral-500 sm:text-xl">
+          {isStudent
+            ? 'Compete, learn, build, and grow with peers pushing the same limits as you.'
+            : 'Organize everything from one clean dashboard made for the club.'}
+        </p>
       </div>
     </div>
   )

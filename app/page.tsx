@@ -9,6 +9,39 @@ export default function Home() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
 
+  const navItems = [
+    { label: 'Batches', href: '/batches' },
+    { label: 'Courses', href: '/courses' },
+    { label: 'Contests', href: '/contests' },
+    { label: 'Achievements', href: '/achievements' },
+    { label: 'Alumni', href: '/alumni' },
+  ]
+
+  const features = [
+    {
+      title: 'Learn and Practice',
+      description:
+        'Access study materials, recordings, and practice problems in one clean workspace.',
+    },
+    {
+      title: 'Take Exams',
+      description:
+        'Attempt MCQ exams with clear results, structured review, and progress tracking.',
+    },
+    {
+      title: 'Connect with Members',
+      description:
+        'Stay close to your batch, alumni, and club updates with a simple information flow.',
+    },
+  ]
+
+  const stats = [
+    { value: '500+', label: 'Active Members' },
+    { value: '100+', label: 'Practice Problems' },
+    { value: '50+', label: 'Video Tutorials' },
+    { value: '20+', label: 'Expert Mentors' },
+  ]
+
   useEffect(() => {
     const token = localStorage.getItem('auth_token')
     setIsAuthenticated(!!token)
@@ -17,10 +50,10 @@ export default function Home() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center">
-        <div className="text-center text-white">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
-          <p>Loading...</p>
+      <div className="page-shell flex items-center justify-center">
+        <div className="text-center">
+          <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-b-2 border-neutral-900"></div>
+          <p className="text-sm font-medium tracking-[0.2em] text-neutral-600 uppercase">Loading</p>
         </div>
       </div>
     )
@@ -28,20 +61,18 @@ export default function Home() {
 
   if (isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-600 to-blue-800">
-        <div className="flex items-center justify-center min-h-screen px-4">
-          <div className="text-center text-white max-w-md">
-            <h1 className="text-5xl font-bold mb-4">Math Club</h1>
-            <p className="text-xl text-blue-100 mb-8">
-              Competitive Programming Excellence
-            </p>
-            <p className="text-blue-100 mb-8">
-              Welcome back! You are logged in.
-            </p>
-            <Link href="/dashboard">
-              <button className="w-full bg-white text-blue-600 font-bold py-3 px-8 rounded-lg hover:bg-blue-50 transition duration-200 mb-4">
-                Go to Dashboard
-              </button>
+      <div className="page-shell flex items-center justify-center px-4 py-10">
+        <div className="mono-surface w-full max-w-xl rounded-[2rem] p-8 text-center md:p-12">
+          <span className="mono-badge">Signed in</span>
+          <h1 className="mt-6 text-4xl font-black tracking-tight text-neutral-950 md:text-5xl">
+            Math Club
+          </h1>
+          <p className="mx-auto mt-4 max-w-lg text-base leading-7 text-neutral-600">
+            Welcome back. Your dashboard is ready in a clean monochrome workspace.
+          </p>
+          <div className="mt-8 grid gap-3 sm:grid-cols-2">
+            <Link href="/dashboard" className="mono-button mono-button--light px-6 py-3 text-sm font-semibold">
+              Go to Dashboard
             </Link>
             <button
               onClick={() => {
@@ -50,7 +81,7 @@ export default function Home() {
                 localStorage.removeItem('user_id')
                 router.push('/')
               }}
-              className="w-full bg-blue-400 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-300 transition duration-200"
+              className="mono-button px-6 py-3 text-sm font-semibold"
             >
               Logout
             </button>
@@ -61,200 +92,177 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Navigation */}
-      <nav className="bg-white shadow-sm">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <Link href="/profile">
-              <img 
-                src="https://zxkeolkojkoenkszekiy.supabase.co/storage/v1/object/public/math-club-images/Math%20Club%20Logo/math%20club%20logo%202.png" 
-                alt="Math Club Logo" 
-                className="h-10 w-auto object-contain cursor-pointer"
-              />
-            </Link>
-            <span className="text-2xl font-bold text-indigo-600">Math Club</span>
+    <div className="page-shell">
+      <nav className="border-b border-neutral-200 bg-white/95 backdrop-blur">
+        <div className="mono-container flex items-center justify-between gap-6 py-4">
+          <Link href="/" className="flex items-center gap-3">
+            <img
+              src="https://zxkeolkojkoenkszekiy.supabase.co/storage/v1/object/public/math-club-images/Math%20Club%20Logo/math%20club%20logo%202.png"
+              alt="Math Club Logo"
+              className="h-10 w-auto object-contain"
+            />
+            <span className="text-xl font-black tracking-tight text-neutral-950 md:text-2xl">
+              Math Club
+            </span>
+          </Link>
+
+          <div className="hidden items-center gap-6 lg:flex">
+            {navItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="text-sm font-medium text-neutral-600 transition-colors hover:text-neutral-950"
+              >
+                {item.label}
+              </Link>
+            ))}
           </div>
-          <div className="flex gap-4">
-            <Link href="/login">
-              <button className="px-4 py-2 text-indigo-600 hover:text-indigo-700 font-medium">
-                Login
-              </button>
+
+          <div className="flex items-center gap-3">
+            <Link href="/login" className="mono-button mono-button--light px-4 py-2 text-sm font-semibold">
+              Login
             </Link>
-            <Link href="/signup">
-              <button className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium">
-                Sign Up
-              </button>
+            <Link href="/signup" className="mono-button px-4 py-2 text-sm font-semibold">
+              Sign Up
             </Link>
           </div>
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <section className="bg-gradient-to-br from-indigo-600 to-blue-800 text-white py-20 px-4">
-        <div className="max-w-6xl mx-auto text-center">
-          <h1 className="text-5xl md:text-6xl font-bold mb-6">Welcome to Math Club</h1>
-          <p className="text-xl md:text-2xl text-indigo-100 mb-8 max-w-2xl mx-auto">
-            Master competitive programming, solve challenging problems, and excel in mathematical competitions
+      <section className="mono-section">
+        <div className="mono-container text-center">
+          <span className="mono-badge">Competitive Programming Club</span>
+          <h1 className="mt-8 text-5xl font-black tracking-tight text-neutral-950 md:text-7xl">
+            HELLO PROGRAMMER,
+            <span className="block mt-3">WELCOME TO</span>
+          </h1>
+          <div className="mt-10 flex justify-center">
+            <img
+              src="https://zxkeolkojkoenkszekiy.supabase.co/storage/v1/object/public/math-club-images/Math%20Club%20Logo/math%20club%20logo%202.png"
+              alt="Math Club Logo"
+              className="h-40 w-auto object-contain md:h-52"
+            />
+          </div>
+          <p className="mx-auto mt-8 max-w-2xl text-base leading-8 text-neutral-600 md:text-lg">
+            A clean, structured space for algorithms, problem solving, and collaborative learning.
+            Compete, learn, build, and grow with peers pushing the same limits as you.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/signup">
-              <button className="px-8 py-4 bg-white text-indigo-600 rounded-lg font-bold hover:bg-gray-100 transition">
-                Get Started
-              </button>
+          <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+            <Link href="/signup" className="mono-button px-8 py-4 text-base font-semibold">
+              Join Now
             </Link>
-            <Link href="/login">
-              <button className="px-8 py-4 bg-indigo-500 text-white rounded-lg font-bold hover:bg-indigo-400 transition border-2 border-white">
-                Already a Member?
-              </button>
+            <Link href="/dashboard" className="mono-button mono-button--light px-8 py-4 text-base font-semibold">
+              Explore Platform
             </Link>
           </div>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-20 px-4 bg-gray-50">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold text-center mb-16 text-gray-900">
-            Why Join Math Club?
-          </h2>
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="bg-white p-8 rounded-lg shadow hover:shadow-lg transition">
-              <div className="text-4xl mb-4">📚</div>
-              <h3 className="text-2xl font-bold mb-4 text-gray-900">Learn & Practice</h3>
-              <p className="text-gray-600">
-                Access comprehensive study materials, video tutorials, and practice problems curated by experts
+      <section className="mono-section border-t border-neutral-200 bg-neutral-50/70">
+        <div className="mono-container grid gap-6 md:grid-cols-3">
+          {features.map((feature) => (
+            <article key={feature.title} className="mono-card mono-card-hover p-8">
+              <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-full border border-neutral-300 text-sm font-bold text-neutral-700">
+                0{features.indexOf(feature) + 1}
+              </div>
+              <h2 className="text-2xl font-bold tracking-tight text-neutral-950">
+                {feature.title}
+              </h2>
+              <p className="mt-4 text-sm leading-7 text-neutral-600">
+                {feature.description}
+              </p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="mono-section">
+        <div className="mono-container grid gap-6 md:grid-cols-2">
+          <div className="mono-card mono-card-hover p-8 md:p-10">
+            <span className="mono-badge">Class Recordings</span>
+            <h3 className="mt-6 text-3xl font-black tracking-tight text-neutral-950">
+              Organized, searchable learning
+            </h3>
+            <p className="mt-4 text-sm leading-7 text-neutral-600">
+              Access class sessions, download resources, and review everything in a quiet black-and-white interface.
+            </p>
+          </div>
+          <div className="mono-card mono-card-hover p-8 md:p-10">
+            <span className="mono-badge">Advanced Exams</span>
+            <h3 className="mt-6 text-3xl font-black tracking-tight text-neutral-950">
+              Clear progress and result flow
+            </h3>
+            <p className="mt-4 text-sm leading-7 text-neutral-600">
+              Randomized exams, instant feedback, and structured analytics, all without visual noise.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section className="border-y border-neutral-200 bg-white">
+        <div className="mono-container grid grid-cols-2 gap-4 py-10 md:grid-cols-4">
+          {stats.map((item) => (
+            <div key={item.label} className="rounded-2xl border border-neutral-200 px-4 py-6 text-center">
+              <div className="text-3xl font-black text-neutral-950">{item.value}</div>
+              <p className="mt-2 text-xs font-medium uppercase tracking-[0.22em] text-neutral-500">
+                {item.label}
               </p>
             </div>
-            <div className="bg-white p-8 rounded-lg shadow hover:shadow-lg transition">
-              <div className="text-4xl mb-4">🎯</div>
-              <h3 className="text-2xl font-bold mb-4 text-gray-900">Take Exams</h3>
-              <p className="text-gray-600">
-                Participate in regular MCQ exams with instant results and detailed performance analytics
-              </p>
-            </div>
-            <div className="bg-white p-8 rounded-lg shadow hover:shadow-lg transition">
-              <div className="text-4xl mb-4">👥</div>
-              <h3 className="text-2xl font-bold mb-4 text-gray-900">Connect</h3>
-              <p className="text-gray-600">
-                Network with peers in your batch, share knowledge, and grow together as a community
-              </p>
+          ))}
+        </div>
+      </section>
+
+      <section className="mono-section bg-neutral-50/70">
+        <div className="mono-container">
+          <div className="mono-surface rounded-[2rem] px-8 py-10 text-center md:px-12 md:py-14">
+            <h2 className="text-3xl font-black tracking-tight text-neutral-950 md:text-5xl">
+              Ready to start your journey?
+            </h2>
+            <p className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-neutral-600 md:text-base">
+              Join thousands of students already learning, practicing, and excelling with Math Club.
+            </p>
+            <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
+              <Link href="/signup" className="mono-button px-8 py-4 text-base font-semibold">
+                Sign Up Now
+              </Link>
+              <Link href="/login" className="mono-button mono-button--light px-8 py-4 text-base font-semibold">
+                Login
+              </Link>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Features Showcase */}
-      <section className="py-20 px-4">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid md:grid-cols-2 gap-12 items-center mb-16">
-            <div>
-              <h3 className="text-3xl font-bold mb-4 text-gray-900">Class Recordings</h3>
-              <p className="text-gray-600 mb-4">
-                Access recorded class sessions and video tutorials anytime, anywhere. Learn at your own pace.
-              </p>
-              <ul className="space-y-2 text-gray-600">
-                <li>✓ High-quality recordings</li>
-                <li>✓ Organized by batch and topic</li>
-                <li>✓ Downloadable resources</li>
-              </ul>
-            </div>
-            <div className="bg-indigo-100 h-64 rounded-lg flex items-center justify-center">
-              <div className="text-6xl">🎥</div>
-            </div>
+      <footer className="border-t border-neutral-200 bg-white py-10">
+        <div className="mono-container flex flex-col gap-8 md:flex-row md:items-start md:justify-between">
+          <div>
+            <span className="text-lg font-black tracking-tight text-neutral-950">Math Club</span>
+            <p className="mt-3 max-w-sm text-sm leading-7 text-neutral-600">
+              Competitive programming, mathematics, and a focused community with a calm monochrome interface.
+            </p>
           </div>
-
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div className="bg-indigo-100 h-64 rounded-lg flex items-center justify-center order-2 md:order-1">
-              <div className="text-6xl">📊</div>
-            </div>
-            <div className="order-1 md:order-2">
-              <h3 className="text-3xl font-bold mb-4 text-gray-900">Advanced Exam System</h3>
-              <p className="text-gray-600 mb-4">
-                Take randomized MCQ exams with real-time scoring and comprehensive result analysis.
-              </p>
-              <ul className="space-y-2 text-gray-600">
-                <li>✓ Randomized question order</li>
-                <li>✓ Instant results and feedback</li>
-                <li>✓ Performance tracking</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Stats Section */}
-      <section className="bg-indigo-600 text-white py-20 px-4">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid md:grid-cols-4 gap-8 text-center">
+          <div className="grid gap-8 sm:grid-cols-2 md:grid-cols-3">
             <div>
-              <div className="text-4xl font-bold mb-2">500+</div>
-              <p className="text-indigo-100">Active Members</p>
-            </div>
-            <div>
-              <div className="text-4xl font-bold mb-2">100+</div>
-              <p className="text-indigo-100">Practice Problems</p>
-            </div>
-            <div>
-              <div className="text-4xl font-bold mb-2">50+</div>
-              <p className="text-indigo-100">Video Tutorials</p>
-            </div>
-            <div>
-              <div className="text-4xl font-bold mb-2">20+</div>
-              <p className="text-indigo-100">Expert Mentors</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-20 px-4 bg-gray-50">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl font-bold mb-6 text-gray-900">Ready to Start Your Journey?</h2>
-          <p className="text-xl text-gray-600 mb-8">
-            Join thousands of students already learning, practicing, and excelling with Math Club
-          </p>
-          <Link href="/signup">
-            <button className="px-8 py-4 bg-indigo-600 text-white rounded-lg font-bold hover:bg-indigo-700 transition">
-              Sign Up Now
-            </button>
-          </Link>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="bg-gray-900 text-gray-300 py-12 px-4">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid md:grid-cols-4 gap-8 mb-8">
-            <div>
-              <div className="text-white font-bold mb-4">Math Club</div>
-              <p className="text-sm">Competitive Programming Excellence</p>
-            </div>
-            <div>
-              <div className="font-bold mb-4 text-white">Quick Links</div>
-              <ul className="space-y-2 text-sm">
-                <li><Link href="/signup" className="hover:text-white">Sign Up</Link></li>
-                <li><Link href="/login" className="hover:text-white">Login</Link></li>
+              <h3 className="text-sm font-semibold uppercase tracking-[0.22em] text-neutral-500">Quick Links</h3>
+              <ul className="mt-4 space-y-2 text-sm text-neutral-600">
+                <li><Link href="/signup" className="transition-colors hover:text-neutral-950">Sign Up</Link></li>
+                <li><Link href="/login" className="transition-colors hover:text-neutral-950">Login</Link></li>
               </ul>
             </div>
             <div>
-              <div className="font-bold mb-4 text-white">Features</div>
-              <ul className="space-y-2 text-sm">
-                <li><a href="#" className="hover:text-white">Exams</a></li>
-                <li><a href="#" className="hover:text-white">Classes</a></li>
-                <li><a href="#" className="hover:text-white">Community</a></li>
+              <h3 className="text-sm font-semibold uppercase tracking-[0.22em] text-neutral-500">Explore</h3>
+              <ul className="mt-4 space-y-2 text-sm text-neutral-600">
+                <li><Link href="/courses" className="transition-colors hover:text-neutral-950">Courses</Link></li>
+                <li><Link href="/contests" className="transition-colors hover:text-neutral-950">Contests</Link></li>
               </ul>
             </div>
             <div>
-              <div className="font-bold mb-4 text-white">Support</div>
-              <ul className="space-y-2 text-sm">
-                <li><a href="#" className="hover:text-white">Contact Us</a></li>
-                <li><a href="#" className="hover:text-white">FAQ</a></li>
+              <h3 className="text-sm font-semibold uppercase tracking-[0.22em] text-neutral-500">Support</h3>
+              <ul className="mt-4 space-y-2 text-sm text-neutral-600">
+                <li><a href="#" className="transition-colors hover:text-neutral-950">Contact Us</a></li>
+                <li><a href="#" className="transition-colors hover:text-neutral-950">FAQ</a></li>
               </ul>
             </div>
-          </div>
-          <div className="border-t border-gray-700 pt-8 text-center text-sm">
-            <p>&copy; 2024 Math Club. All rights reserved.</p>
           </div>
         </div>
       </footer>

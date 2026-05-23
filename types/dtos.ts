@@ -142,6 +142,61 @@ export interface CreateClassRecordingRequestDTO {
   batch_year: number | null
 }
 
+// ==================== RESOURCE SHARING ====================
+export interface ResourceFolderDTO {
+  id: number
+  folder_name: string
+  created_by: string
+  is_active: boolean
+  created_at: Date
+}
+
+export interface ResourceDTO {
+  id: number
+  title: string
+  description?: string
+  resource_type: 'video' | 'link'
+  resource_url: string
+  folder_id?: number | null
+  batch_year?: number | null
+  added_by: string
+  is_active: boolean
+  created_at: Date
+  updated_at: Date
+}
+
+export interface CreateResourceRequestDTO {
+  title: string
+  description?: string
+  resource_type: 'video' | 'link'
+  resource_url: string
+  folder_id?: number | null
+  folder_name?: string // optional name to create a new folder
+  batch_year?: number | null
+}
+
+export interface VideoDTO {
+  id: number
+  title: string
+  description?: string
+  youtube_url: string
+  folder_id?: number | null
+  batch_year?: number | null
+  uploaded_by: string
+  is_active: boolean
+  created_at: Date
+  updated_at: Date
+}
+
+export interface CreateVideoRequestDTO {
+  title: string
+  description?: string
+  youtube_url: string
+  folder_id?: number | null
+  folder_name?: string
+  batch_year?: number | null
+}
+
 // ==================== NOTICES ====================
 export interface NoticeDTO {
   id: number

@@ -89,12 +89,12 @@ export default function SignupPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-        <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full">
+      <div className="page-shell flex items-center justify-center px-4 py-10">
+        <div className="mono-surface w-full max-w-md rounded-[2rem] p-8 md:p-10">
           <div className="text-center">
-            <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full border border-neutral-300 bg-neutral-50">
               <svg
-                className="h-6 w-6 text-green-600"
+                className="h-6 w-6 text-neutral-900"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -107,13 +107,13 @@ export default function SignupPage() {
                 />
               </svg>
             </div>
-            <h2 className="mt-4 text-2xl font-bold text-gray-900">Signup Successful!</h2>
-            <p className="mt-2 text-gray-600">
+            <h2 className="mt-4 text-2xl font-black tracking-tight text-neutral-950">Signup Successful!</h2>
+            <p className="mt-2 text-sm leading-7 text-neutral-600">
               Check your email to verify your account. An admin will review your request and approve or reject it.
             </p>
             <Link
               href="/login"
-              className="mt-6 block w-full bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700 transition text-center"
+              className="mono-button mt-6 block w-full px-4 py-3 text-center text-sm font-semibold"
             >
               Go to Login
             </Link>
@@ -125,32 +125,32 @@ export default function SignupPage() {
 
   if (!userType) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-        <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2 text-center">Join Math Club</h1>
-          <p className="text-gray-600 mb-8 text-center">Select your account type to continue</p>
+      <div className="page-shell flex items-center justify-center px-4 py-10">
+        <div className="mono-surface w-full max-w-md rounded-[2rem] p-8 md:p-10">
+          <h1 className="text-center text-3xl font-black tracking-tight text-neutral-950">Join Math Club</h1>
+          <p className="mb-8 mt-2 text-center text-sm leading-7 text-neutral-600">Select your account type to continue</p>
 
           <div className="space-y-4">
             <button
               onClick={() => setUserType('student')}
-              className="w-full p-4 border-2 border-indigo-600 rounded-lg hover:bg-indigo-50 transition text-left"
+              className="mono-button mono-button--light w-full p-4 text-left"
             >
-              <div className="font-bold text-indigo-600">Student Account</div>
-              <div className="text-sm text-gray-600">Access courses, exams, and resources</div>
+              <div className="font-bold text-neutral-950">Student Account</div>
+              <div className="text-sm text-neutral-600">Access courses, exams, and resources</div>
             </button>
             
             <button
               onClick={() => setUserType('admin')}
-              className="w-full p-4 border-2 border-green-600 rounded-lg hover:bg-green-50 transition text-left"
+              className="mono-button mono-button--light w-full p-4 text-left"
             >
-              <div className="font-bold text-green-600">Admin Account</div>
-              <div className="text-sm text-gray-600">Manage content, exams, and users</div>
+              <div className="font-bold text-neutral-950">Admin Account</div>
+              <div className="text-sm text-neutral-600">Manage content, exams, and users</div>
             </button>
           </div>
 
-          <p className="text-center text-gray-600 text-sm mt-6">
+          <p className="mt-6 text-center text-sm text-neutral-600">
             Already have an account?{' '}
-            <Link href="/login" className="text-indigo-600 hover:text-indigo-700 font-medium">
+            <Link href="/login" className="font-semibold text-neutral-900 underline underline-offset-4">
               Login
             </Link>
           </p>
@@ -160,49 +160,49 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4 py-12">
-      <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full">
+    <div className="page-shell flex items-center justify-center px-4 py-10">
+      <div className="mono-surface w-full max-w-md rounded-[2rem] p-8 md:p-10">
         <button
           onClick={() => setUserType('')}
-          className="mb-4 text-indigo-600 hover:text-indigo-700 text-sm font-medium"
+          className="mb-4 text-sm font-semibold text-neutral-600 transition-colors hover:text-neutral-950"
         >
           ← Back to Account Type
         </button>
 
-        <h1 className="text-3xl font-bold text-gray-900 mb-1">
+        <h1 className="text-3xl font-black tracking-tight text-neutral-950 mb-1">
           {userType === 'student' ? 'Student' : 'Admin'} Signup
         </h1>
-        <p className="text-gray-600 mb-6">Join the Math Club</p>
+        <p className="text-sm leading-7 text-neutral-600 mb-6">Join the Math Club</p>
 
         {error && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded text-red-700 text-sm">
+          <div className="mb-4 rounded-xl border border-neutral-300 bg-neutral-50 p-3 text-sm text-neutral-700">
             {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
+            <label className="mb-1 block text-sm font-semibold text-neutral-700">Full Name *</label>
             <input
               type="text"
               name="full_name"
               value={formData.full_name}
               onChange={handleChange}
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="mono-input"
               placeholder="John Doe"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+            <label className="mb-1 block text-sm font-semibold text-neutral-700">Email *</label>
             <input
               type="email"
               name="email"
               value={formData.email}
               onChange={handleChange}
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="mono-input"
               placeholder="you@example.com"
             />
           </div>
@@ -210,26 +210,26 @@ export default function SignupPage() {
           {userType === 'student' && (
             <>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Student ID *</label>
+                <label className="mb-1 block text-sm font-semibold text-neutral-700">Student ID *</label>
                 <input
                   type="text"
                   name="student_id"
                   value={formData.student_id}
                   onChange={handleChange}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="mono-input"
                   placeholder="e.g., STU001"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Batch Year *</label>
+                <label className="mb-1 block text-sm font-semibold text-neutral-700">Batch Year *</label>
                 <select
                   name="batch_year"
                   value={formData.batch_year}
                   onChange={handleChange}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="mono-input"
                 >
                   {batchYears.map((year) => (
                     <option key={year} value={year}>
@@ -243,53 +243,53 @@ export default function SignupPage() {
 
           {userType === 'admin' && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Admin ID *</label>
+              <label className="mb-1 block text-sm font-semibold text-neutral-700">Admin ID *</label>
               <input
                 type="text"
                 name="admin_id"
                 value={formData.admin_id}
                 onChange={handleChange}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="mono-input"
                 placeholder="e.g., ADM001"
               />
             </div>
           )}
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Profile Photo</label>
+            <label className="mb-1 block text-sm font-semibold text-neutral-700">Profile Photo</label>
             <input
               type="file"
               name="profile_image"
               onChange={handleFileChange}
               accept="image/jpeg,image/png,image/webp"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="mono-input"
             />
-            <p className="text-xs text-gray-500 mt-1">JPEG, PNG or WebP. Max 5MB.</p>
+            <p className="mt-1 text-xs text-neutral-500">JPEG, PNG or WebP. Max 5MB.</p>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Password *</label>
+            <label className="mb-1 block text-sm font-semibold text-neutral-700">Password *</label>
             <input
               type="password"
               name="password"
               value={formData.password}
               onChange={handleChange}
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="mono-input"
               placeholder="Min 8 characters"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Confirm Password *</label>
+            <label className="mb-1 block text-sm font-semibold text-neutral-700">Confirm Password *</label>
             <input
               type="password"
               name="confirm_password"
               value={formData.confirm_password}
               onChange={handleChange}
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="mono-input"
               placeholder="Confirm your password"
             />
           </div>
@@ -297,15 +297,15 @@ export default function SignupPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700 transition disabled:opacity-50 font-medium"
+            className="mono-button w-full px-4 py-3 text-sm font-semibold disabled:opacity-50"
           >
             {loading ? 'Signing up...' : 'Sign Up'}
           </button>
         </form>
 
-        <p className="text-center text-gray-600 text-sm mt-6">
+        <p className="mt-6 text-center text-sm text-neutral-600">
           Already have an account?{' '}
-          <Link href="/login" className="text-indigo-600 hover:text-indigo-700 font-medium">
+          <Link href="/login" className="font-semibold text-neutral-950 underline underline-offset-4">
             Login
           </Link>
         </p>

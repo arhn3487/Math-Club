@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import axios from 'axios'
 
 interface LoginError {
@@ -133,51 +134,54 @@ export default function LoginPage() {
   const generalError = errors.find((err) => err.field === 'general')
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center p-4">
+    <div className="page-shell flex items-center justify-center px-4 py-10">
       <div className="w-full max-w-md">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <img 
-            src="https://zxkeolkojkoenkszekiy.supabase.co/storage/v1/object/public/math-club-images/Math%20Club%20Logo/math%20club%20logo%202.png" 
-            alt="Math Club Logo" 
-            className="h-32 w-auto mx-auto mb-4 object-contain"
+        <div className="mb-8 text-center">
+          <Link href="/" className="inline-flex items-center justify-center rounded-full border border-neutral-200 bg-white px-4 py-2 text-sm font-medium text-neutral-700 transition-colors hover:text-neutral-950">
+            Back to Home
+          </Link>
+          <img
+            src="https://zxkeolkojkoenkszekiy.supabase.co/storage/v1/object/public/math-club-images/Math%20Club%20Logo/math%20club%20logo%202.png"
+            alt="Math Club Logo"
+            className="mx-auto my-6 h-28 w-auto object-contain"
           />
-          <h1 className="text-4xl font-bold text-white mb-2">Math Club</h1>
-          <p className="text-blue-100">Competitive Programming Excellence</p>
+          <h1 className="text-4xl font-black tracking-tight text-neutral-950">Math Club</h1>
+          <p className="mt-2 text-sm font-medium tracking-[0.2em] uppercase text-neutral-500">
+            Competitive Programming Excellence
+          </p>
         </div>
 
-        {/* Login Card */}
-        <div className="bg-white rounded-lg shadow-xl p-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Login</h2>
+        <div className="mono-surface rounded-[2rem] p-8 md:p-10">
+          <h2 className="text-2xl font-black tracking-tight text-neutral-950">Login</h2>
 
           {/* General Error Message */}
           {generalError && (
-            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded text-red-700">
+            <div className="mb-4 rounded-xl border border-neutral-300 bg-neutral-50 p-4 text-sm text-neutral-700">
               {generalError.message}
             </div>
           )}
 
           {/* Success Message */}
           {successMessage && (
-            <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded text-green-700">
+            <div className="mb-4 rounded-xl border border-neutral-300 bg-neutral-50 p-4 text-sm text-neutral-700">
               {successMessage}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-5">
             {/* Account Type Selection */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Account Type</label>
-              <div className="flex gap-3">
+              <label className="mb-2 block text-sm font-semibold text-neutral-700">Account Type</label>
+              <div className="grid grid-cols-2 gap-3">
                 <button
                   type="button"
                   onClick={() => {
                     setFormData(prev => ({ ...prev, user_type: 'student' }))
                   }}
-                  className={`flex-1 py-2 px-3 rounded-lg font-medium transition ${
+                  className={`mono-button px-3 py-3 text-sm font-semibold ${
                     formData.user_type === 'student'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      ? ''
+                      : 'mono-button--light'
                   }`}
                 >
                   Student
@@ -187,10 +191,10 @@ export default function LoginPage() {
                   onClick={() => {
                     setFormData(prev => ({ ...prev, user_type: 'admin' }))
                   }}
-                  className={`flex-1 py-2 px-3 rounded-lg font-medium transition ${
+                  className={`mono-button px-3 py-3 text-sm font-semibold ${
                     formData.user_type === 'admin'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      ? ''
+                      : 'mono-button--light'
                   }`}
                 >
                   Admin
@@ -200,7 +204,7 @@ export default function LoginPage() {
 
             {/* User ID Field */}
             <div>
-              <label htmlFor="user_id" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="user_id" className="mb-1 block text-sm font-semibold text-neutral-700">
                 {formData.user_type === 'student' ? 'Student ID' : 'Admin ID'}
               </label>
               <input
@@ -210,21 +214,17 @@ export default function LoginPage() {
                 value={formData.user_id}
                 onChange={handleChange}
                 disabled={isLoading}
-                className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  getFieldError('user_id')
-                    ? 'border-red-500 bg-red-50'
-                    : 'border-gray-300'
-                }`}
+                className={`mono-input ${getFieldError('user_id') ? 'border-red-500' : ''}`}
                 placeholder={formData.user_type === 'student' ? 'e.g., STU001' : 'e.g., ADM001'}
               />
               {getFieldError('user_id') && (
-                <p className="mt-1 text-sm text-red-600">{getFieldError('user_id')}</p>
+                <p className="mt-1 text-sm text-neutral-600">{getFieldError('user_id')}</p>
               )}
             </div>
 
             {/* Password Field */}
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="password" className="mb-1 block text-sm font-semibold text-neutral-700">
                 Password
               </label>
               <input
@@ -234,15 +234,11 @@ export default function LoginPage() {
                 value={formData.password}
                 onChange={handleChange}
                 disabled={isLoading}
-                className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  getFieldError('password')
-                    ? 'border-red-500 bg-red-50'
-                    : 'border-gray-300'
-                }`}
+                className={`mono-input ${getFieldError('password') ? 'border-red-500' : ''}`}
                 placeholder="Enter your password"
               />
               {getFieldError('password') && (
-                <p className="mt-1 text-sm text-red-600">{getFieldError('password')}</p>
+                <p className="mt-1 text-sm text-neutral-600">{getFieldError('password')}</p>
               )}
             </div>
 
@@ -250,12 +246,18 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-medium py-2 px-4 rounded-lg transition duration-200"
+              className="mono-button w-full px-4 py-3 text-sm font-semibold disabled:opacity-50"
             >
               {isLoading ? 'Logging in...' : 'Login'}
             </button>
           </form>
 
+          <p className="mt-6 text-center text-sm text-neutral-600">
+            Need an account?{' '}
+            <Link href="/signup" className="font-semibold text-neutral-900 underline underline-offset-4">
+              Sign up here
+            </Link>
+          </p>
         </div>
       </div>
     </div>

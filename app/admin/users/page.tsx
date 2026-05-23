@@ -17,16 +17,32 @@ interface User {
   created_at: string
 }
 
+interface PendingUser {
+  id: string
+  user_id: string
+  full_name: string
+  email: string
+  student_id?: string
+  batch_year?: number
+  profile_image_url?: string
+  created_at: string
+}
+
 export default function AdminUsersPage() {
   const router = useRouter()
   const [users, setUsers] = useState<User[]>([])
+  const [pendingUsers, setPendingUsers] = useState<PendingUser[]>([])
   const [loading, setLoading] = useState(true)
+  const [loadingApprovals, setLoadingApprovals] = useState(true)
   const [error, setError] = useState('')
+  const [approvalError, setApprovalError] = useState('')
+  const [successMessage, setSuccessMessage] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
   const [filterType, setFilterType] = useState<'all' | 'student' | 'admin'>('all')
   const [filterBatch, setFilterBatch] = useState<number | 'all'>('all')
   const [batches, setBatches] = useState<number[]>([])
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
+  const [actionLoading, setActionLoading] = useState<string | null>(null)
 
   useEffect(() => {
     const token = localStorage.getItem('auth_token')
@@ -38,6 +54,7 @@ export default function AdminUsersPage() {
     }
 
     fetchUsers()
+    fetchPendingUsers()
   }, [router])
 
   const fetchUsers = async () => {
@@ -67,6 +84,29 @@ export default function AdminUsersPage() {
     }
   }
 
+  const fetchPendingUsers = async () => {
+    try {
+      setLoadingApprovals(true)
+      const response = await fetch('/api/admin/approvals', {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
+        },
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch pending approvals')
+      }
+
+      const data = await response.json()
+      setPendingUsers(data.users || [])
+    } catch (err) {
+      setApprovalError('Failed to load pending approvals')
+      console.error(err)
+    } finally {
+      setLoadingApprovals(false)
+    }
+  }
+
   const handleDeleteUser = async (userId: string) => {
     try {
       const response = await fetch(`/api/admin/users/${userId}`, {
@@ -85,6 +125,64 @@ export default function AdminUsersPage() {
     } catch (err) {
       setError('Failed to delete user')
       console.error(err)
+    }
+  }
+
+  const handleApprove = async (userId: string, studentId: string) => {
+    setActionLoading(userId)
+    setSuccessMessage('')
+    try {
+      const response = await fetch(`/api/admin/approvals/${userId}`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ approve: true }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to approve user')
+      }
+
+      setPendingUsers(pendingUsers.filter((u) => u.id !== userId))
+      setSuccessMessage(`Approved ${studentId}`)
+      setTimeout(() => setSuccessMessage(''), 2500)
+    } catch (err) {
+      setApprovalError('Failed to approve user')
+      console.error(err)
+    } finally {
+      setActionLoading(null)
+    }
+  }
+
+  const handleReject = async (userId: string, studentId: string) => {
+    if (!confirm(`Reject ${studentId}?`)) return
+
+    setActionLoading(userId)
+    setSuccessMessage('')
+    try {
+      const response = await fetch(`/api/admin/approvals/${userId}`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ approve: false }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to reject user')
+      }
+
+      setPendingUsers(pendingUsers.filter((u) => u.id !== userId))
+      setSuccessMessage(`Rejected ${studentId}`)
+      setTimeout(() => setSuccessMessage(''), 2500)
+    } catch (err) {
+      setApprovalError('Failed to reject user')
+      console.error(err)
+    } finally {
+      setActionLoading(null)
     }
   }
 
@@ -119,7 +217,7 @@ export default function AdminUsersPage() {
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
           <Link href="/dashboard" className="flex items-center gap-3">
             <img 
-              src="https://zxkeolkojkoenkszekiy.supabase.co/storage/v1/object/public/math-club-images/Math%20Club%20Logo/math%20club%20logo%202.png" 
+              src="https://zxkeolkojkoenkszekiy.supabase.co/storage/v1/object/public/math-club-images/Math%20Club%20Logo/math%20club%20logo.png" 
               alt="Math Club Logo" 
               className="h-10 w-auto object-contain"
             />
@@ -143,14 +241,63 @@ export default function AdminUsersPage() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">User Management</h1>
-          <p className="text-gray-600 mt-2">Manage all students and admins in the system</p>
+          <p className="text-gray-600 mt-2">Manage users and pending approvals in one place</p>
         </div>
+
+        {successMessage && (
+          <div className="mb-4 rounded border border-green-200 bg-green-50 p-4 text-green-700">
+            {successMessage}
+          </div>
+        )}
 
         {error && (
           <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded text-red-700">
             {error}
           </div>
         )}
+
+        {approvalError && (
+          <div className="mb-4 rounded border border-red-200 bg-red-50 p-4 text-red-700">
+            {approvalError}
+          </div>
+        )}
+
+        <div className="mb-6 rounded-lg border border-neutral-200 bg-white p-6 shadow-sm">
+          <h2 className="mb-4 text-xl font-bold text-neutral-950">Pending Approvals</h2>
+          {loadingApprovals ? (
+            <p className="text-neutral-600">Loading pending approvals...</p>
+          ) : pendingUsers.length === 0 ? (
+            <p className="text-neutral-600">No pending student approvals.</p>
+          ) : (
+            <div className="space-y-4">
+              {pendingUsers.map((user) => (
+                <div key={user.id} className="flex items-center justify-between gap-4 rounded-2xl border border-neutral-200 p-4">
+                  <div>
+                    <p className="font-semibold text-neutral-950">{user.full_name}</p>
+                    <p className="text-sm text-neutral-600">{user.email}</p>
+                    <p className="text-sm text-neutral-600">Student ID: {user.student_id || 'N/A'}</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleApprove(user.id, user.student_id || 'Unknown')}
+                      disabled={actionLoading === user.id}
+                      className="rounded-full border border-neutral-300 bg-white px-4 py-2 text-sm font-semibold text-neutral-900 transition hover:border-neutral-900 disabled:opacity-50"
+                    >
+                      Approve
+                    </button>
+                    <button
+                      onClick={() => handleReject(user.id, user.student_id || 'Unknown')}
+                      disabled={actionLoading === user.id}
+                      className="rounded-full border border-neutral-300 bg-white px-4 py-2 text-sm font-semibold text-neutral-900 transition hover:border-neutral-900 disabled:opacity-50"
+                    >
+                      Reject
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
 
         {/* Filters */}
         <div className="bg-white rounded-lg shadow mb-6 p-6">

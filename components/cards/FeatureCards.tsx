@@ -6,17 +6,17 @@ import { User, Course, Achievement, AlumniMember } from '@/types'
 // User Profile Card
 export function UserCard({ user }: { user: User }) {
   return (
-    <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+    <Card className="cursor-pointer transition hover:-translate-y-1 hover:shadow-md">
       {user.profile_pic && (
         <img
           src={user.profile_pic}
           alt={user.full_name || 'User'}
-          className="w-full h-48 object-cover rounded-lg mb-4"
+          className="mb-4 h-48 w-full rounded-2xl object-cover"
         />
       )}
       <div className="space-y-2">
         <h3 className="text-lg font-bold">{user.full_name || 'No Name'}</h3>
-        <p className="text-gray-600 text-sm">{user.email}</p>
+        <p className="text-sm text-neutral-600">{user.email}</p>
         {user.batch_name && (
           <Badge variant="primary">{user.batch_name}</Badge>
         )}
@@ -36,17 +36,17 @@ export function UserCard({ user }: { user: User }) {
 // Course Card
 export function CourseCard({ course }: { course: Course }) {
   return (
-    <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+    <Card className="cursor-pointer transition hover:-translate-y-1 hover:shadow-md">
       {course.image && (
         <img
           src={course.image}
           alt={course.title || 'Course'}
-          className="w-full h-40 object-cover rounded-lg mb-4"
+          className="mb-4 h-40 w-full rounded-2xl object-cover"
         />
       )}
       <div className="space-y-2">
         <h3 className="text-lg font-bold">{course.title || 'Untitled Course'}</h3>
-        <p className="text-gray-600 text-sm line-clamp-2">
+        <p className="line-clamp-2 text-sm text-neutral-600">
           {course.description || 'No description'}
         </p>
       </div>
@@ -62,14 +62,14 @@ export function AchievementCard({ achievement }: { achievement: Achievement }) {
         <img
           src={achievement.image}
           alt={achievement.title || 'Achievement'}
-          className="w-full h-48 object-cover rounded-lg mb-4"
+          className="mb-4 h-48 w-full rounded-2xl object-cover"
         />
       )}
       <div className="space-y-2">
         <h3 className="text-lg font-bold">{achievement.title || 'Achievement'}</h3>
-        <p className="text-gray-600 text-sm">{achievement.intro || ''}</p>
+        <p className="text-sm text-neutral-600">{achievement.intro || ''}</p>
         {achievement.date && (
-          <p className="text-gray-500 text-xs">{achievement.date}</p>
+          <p className="text-xs text-neutral-500">{achievement.date}</p>
         )}
       </div>
     </Card>
@@ -84,7 +84,7 @@ export function AlumniCard({ alumni }: { alumni: AlumniMember }) {
         <img
           src={alumni.image_url}
           alt={alumni.full_name}
-          className="w-24 h-24 rounded-full mx-auto mb-4 object-cover"
+          className="mx-auto mb-4 h-24 w-24 rounded-full object-cover"
         />
       )}
       <div className="space-y-2">
@@ -93,19 +93,19 @@ export function AlumniCard({ alumni }: { alumni: AlumniMember }) {
           <Badge variant="secondary">{alumni.position_in_club}</Badge>
         )}
         {alumni.designation && (
-          <p className="text-gray-600 text-sm font-semibold">
+          <p className="text-sm font-semibold text-neutral-600">
             {alumni.designation}
           </p>
         )}
         {alumni.company_name && (
-          <p className="text-gray-600 text-sm">{alumni.company_name}</p>
+          <p className="text-sm text-neutral-600">{alumni.company_name}</p>
         )}
         {alumni.linkedin_url && (
           <a
             href={alumni.linkedin_url}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-blue-600 hover:underline text-sm"
+            className="text-sm text-neutral-900 underline decoration-neutral-300 underline-offset-4 hover:decoration-neutral-900"
           >
             LinkedIn
           </a>
@@ -132,7 +132,7 @@ export function ContestCard({
   return (
     <Card
       onClick={onClick}
-      className="cursor-pointer hover:shadow-lg transition-shadow"
+      className="cursor-pointer transition hover:-translate-y-1 hover:shadow-md"
     >
       <div className="flex justify-between items-start mb-2">
         <h3 className="text-lg font-bold">{title}</h3>
@@ -149,12 +149,12 @@ export function ContestCard({
         </Badge>
       </div>
       {startTime && (
-        <p className="text-gray-600 text-sm">
+        <p className="text-sm text-neutral-600">
           Start: {new Date(startTime).toLocaleString()}
         </p>
       )}
       {endTime && (
-        <p className="text-gray-600 text-sm">
+        <p className="text-sm text-neutral-600">
           End: {new Date(endTime).toLocaleString()}
         </p>
       )}
@@ -174,8 +174,8 @@ export function StatCard({
 }) {
   return (
     <Card className="text-center">
-      <p className="text-gray-600 text-sm mb-2">{title}</p>
-      <p className="text-4xl font-bold text-blue-600">
+      <p className="mb-2 text-sm text-neutral-600">{title}</p>
+      <p className="text-4xl font-black text-neutral-950">
         {value}
         {suffix}
       </p>

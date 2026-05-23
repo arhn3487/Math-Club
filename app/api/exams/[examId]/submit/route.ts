@@ -34,6 +34,24 @@ export async function POST(
 
     const supabase = getSupabaseAdmin()
 
+    const { data: existingResult, error: existingResultError } = await supabase
+      .from('exam_results')
+      .select('id')
+      .eq('exam_id', params.examId)
+      .eq('user_id', user.user_id)
+      .maybeSingle()
+
+    if (existingResultError) throw existingResultError
+    if (existingResult) {
+      return NextResponse.json(
+        {
+          message: 'You have already submitted this exam.',
+          resultId: existingResult.id,
+        },
+        { status: 409 }
+      )
+    }
+
     // Get exam details
     const { data: exam, error: examError } = await supabase
       .from('exams')
@@ -92,24 +110,29 @@ export async function POST(
 
     // Create result record
     const percentage = examTotalMarks > 0 ? (totalMarks / examTotalMarks) * 100 : 0
-    const { error: resultError } = await supabase.from('exam_results').insert([
-      {
-        exam_id: parseInt(params.examId),
-        user_id: user.user_id,
-        total_questions: questions.length,
-        correct_answers: correctCount,
-        total_marks_obtained: totalMarks,
-        total_marks: examTotalMarks,
-        percentage: parseFloat(percentage.toFixed(2)),
-        started_at: new Date().toISOString(),
-        completed_at: new Date().toISOString(),
-      },
-    ])
+    const { data: resultRecord, error: resultError } = await supabase
+      .from('exam_results')
+      .insert([
+        {
+          exam_id: parseInt(params.examId),
+          user_id: user.user_id,
+          total_questions: questions.length,
+          correct_answers: correctCount,
+          total_marks_obtained: totalMarks,
+          total_marks: examTotalMarks,
+          percentage: parseFloat(percentage.toFixed(2)),
+          started_at: new Date().toISOString(),
+          completed_at: new Date().toISOString(),
+        },
+      ])
+      .select('id, completed_at')
+      .single()
 
     if (resultError) throw resultError
 
     return NextResponse.json({
       success: true,
+      resultId: resultRecord.id,
       result: {
         correctAnswers: correctCount,
         totalMarks,

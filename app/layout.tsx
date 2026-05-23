@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import { StudentTopBar } from '@/components/layout/StudentTopBar'
 
 export const metadata: Metadata = {
   title: 'Math Club ',
@@ -14,6 +15,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="bg-white text-neutral-900 antialiased">
+        <StudentTopBar />
         <main className="min-h-screen">{children}</main>
       </body>
     </html>

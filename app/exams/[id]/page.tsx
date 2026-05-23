@@ -35,6 +35,7 @@ export default function TakeExamPage() {
   const [responses, setResponses] = useState<Record<number, string>>({})
   const [timeRemaining, setTimeRemaining] = useState(0)
   const [submitted, setSubmitted] = useState(false)
+  const [resultId, setResultId] = useState<number | null>(null)
 
   useEffect(() => {
     const token = localStorage.getItem('auth_token')
@@ -73,6 +74,13 @@ export default function TakeExamPage() {
           Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
         },
       })
+
+      if (response.status === 409) {
+        const data = await response.json()
+        setResultId(data.resultId || null)
+        setError(data.message || 'You have already completed this exam.')
+        return
+      }
 
       if (!response.ok) {
         throw new Error('Failed to fetch exam')
@@ -126,9 +134,18 @@ export default function TakeExamPage() {
       })
 
       if (!response.ok) {
+        if (response.status === 409) {
+          const data = await response.json()
+          setResultId(data.resultId || null)
+          setSubmitted(true)
+          return
+        }
+
         throw new Error('Failed to submit exam')
       }
 
+      const data = await response.json()
+      setResultId(data.resultId || null)
       setSubmitted(true)
     } catch (err) {
       setError('Failed to submit exam')
@@ -155,6 +172,32 @@ export default function TakeExamPage() {
   }
 
   if (!exam) {
+    if (resultId) {
+      return (
+        <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-8 text-center">
+            <div className="text-6xl mb-4">✓</div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Exam already submitted</h2>
+            <p className="text-gray-600 mb-6">
+              You have already completed this exam. You can review your paper below.
+            </p>
+            <div className="space-y-3">
+              <Link href={`/exams/results/${resultId}`}>
+                <button className="w-full px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+                  View Paper
+                </button>
+              </Link>
+              <Link href="/exams">
+                <button className="w-full px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+                  Back to Exams
+                </button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      )
+    }
+
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -178,6 +221,13 @@ export default function TakeExamPage() {
           <p className="text-gray-600 mb-6">
             Your exam has been submitted successfully. Check your results in the results section.
           </p>
+          {resultId && (
+            <Link href={`/exams/results/${resultId}`}>
+              <button className="w-full px-6 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 mb-3">
+                View Paper
+              </button>
+            </Link>
+          )}
           <Link href="/exams">
             <button className="w-full px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
               Back to Exams

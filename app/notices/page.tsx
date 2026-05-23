@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
 
 interface Notice {
   id: number
@@ -99,31 +98,6 @@ export default function StudentNoticesPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Navigation */}
-      <nav className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <Link href="/dashboard" className="flex items-center gap-3">
-            <img 
-              src="https://zxkeolkojkoenkszekiy.supabase.co/storage/v1/object/public/math-club-images/Math%20Club%20Logo/math%20club%20logo.png" 
-              alt="Math Club Logo" 
-              className="h-10 w-auto object-contain"
-            />
-            <span className="text-2xl font-bold text-indigo-600">Math Club</span>
-          </Link>
-          <button
-            onClick={() => {
-              localStorage.removeItem('auth_token')
-              localStorage.removeItem('user_type')
-              localStorage.removeItem('user_id')
-              router.push('/')
-            }}
-            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-          >
-            Logout
-          </button>
-        </div>
-      </nav>
-
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -138,20 +112,18 @@ export default function StudentNoticesPage() {
         )}
 
         {/* Filters */}
-        <div className="flex gap-2 mb-8 flex-wrap">
+        <div className="tabs-shell">
+          <div className="tabs-track grid-cols-2 md:grid-cols-4">
           {['all', 'event', 'announcement', 'general'].map((type) => (
             <button
               key={type}
               onClick={() => setFilterType(type as any)}
-              className={`px-4 py-2 rounded-lg font-medium transition ${
-                filterType === type
-                  ? 'bg-indigo-600 text-white'
-                  : 'bg-white text-gray-700 border border-gray-300 hover:border-gray-400'
-              }`}
+              className={`tab-button ${filterType === type ? 'tab-button-active' : ''}`}
             >
               {type === 'all' ? 'All' : type.charAt(0).toUpperCase() + type.slice(1)}
             </button>
           ))}
+          </div>
         </div>
 
         {/* Notices List */}

@@ -133,7 +133,7 @@ export default function Home() {
         <div className="mono-container text-center">
           <span className="mono-badge">MIST Math Club</span>
           <h1 className="mt-8 text-5xl font-black tracking-tight text-neutral-950 md:text-7xl">
-            HELLO PROGRAMMER,
+            HELLO ,
             <span className="block mt-3">WELCOME TO</span>
           </h1>
           <div className="mt-10 flex justify-center">

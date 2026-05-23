@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
 
 interface Resource {
   id: number
@@ -184,32 +183,6 @@ export default function StudentResourcesPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <Link href="/dashboard" className="flex items-center gap-3">
-            <img
-              src="https://zxkeolkojkoenkszekiy.supabase.co/storage/v1/object/public/math-club-images/Math%20Club%20Logo/math%20club%20logo.png"
-              alt="Math Club Logo"
-              className="h-10 w-auto object-contain"
-            />
-            <span className="text-2xl font-bold text-indigo-600">Math Club</span>
-          </Link>
-          <div className="flex gap-4 items-center">
-            <button
-              onClick={() => {
-                localStorage.removeItem('auth_token')
-                localStorage.removeItem('user_type')
-                localStorage.removeItem('user_id')
-                router.push('/')
-              }}
-              className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-            >
-              Logout
-            </button>
-          </div>
-        </div>
-      </nav>
-
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Shared Resources</h1>
@@ -222,25 +195,17 @@ export default function StudentResourcesPage() {
           </div>
         )}
 
-        <div className="mb-6 rounded-full bg-neutral-100 p-1">
-          <div className="grid grid-cols-2 gap-1">
+        <div className="tabs-shell">
+          <div className="tabs-track grid-cols-2">
             <button
               onClick={() => { setActiveTab('videos'); setSelectedFolder(null) }}
-              className={`rounded-full px-4 py-3 text-sm font-semibold transition ${
-                activeTab === 'videos'
-                  ? 'bg-white text-red-600 shadow-sm'
-                  : 'text-neutral-500'
-              }`}
+              className={`tab-button ${activeTab === 'videos' ? 'tab-button-active' : ''}`}
             >
               Videos
             </button>
             <button
               onClick={() => { setActiveTab('github'); setSelectedFolder(null) }}
-              className={`rounded-full px-4 py-3 text-sm font-semibold transition ${
-                activeTab === 'github'
-                  ? 'bg-white text-red-600 shadow-sm'
-                  : 'text-neutral-500'
-              }`}
+              className={`tab-button ${activeTab === 'github' ? 'tab-button-active' : ''}`}
             >
               GitHub
             </button>

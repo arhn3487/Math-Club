@@ -31,6 +31,26 @@ export async function GET(
 
     const supabase = getSupabaseAdmin()
 
+    // Block repeat attempts once a result already exists for this student.
+    const { data: existingResult, error: existingResultError } = await supabase
+      .from('exam_results')
+      .select('id, completed_at')
+      .eq('exam_id', params.examId)
+      .eq('user_id', user.user_id)
+      .maybeSingle()
+
+    if (existingResultError) throw existingResultError
+    if (existingResult) {
+      return NextResponse.json(
+        {
+          message: 'You have already completed this exam.',
+          resultId: existingResult.id,
+          completedAt: existingResult.completed_at,
+        },
+        { status: 409 }
+      )
+    }
+
     // Get exam
     const { data: exam, error: examError } = await supabase
       .from('exams')

@@ -254,23 +254,23 @@ export default function AdminResourceSharingPage() {
       <div className="mx-auto max-w-7xl px-4 py-8">
         {error && <div className="mb-4 rounded border border-red-200 bg-red-50 p-4 text-red-700">{error}</div>}
 
-        <div className="mb-6 rounded-full bg-neutral-100 p-1">
-          <div className="grid grid-cols-3 gap-1">
+        <div className="tabs-shell">
+          <div className="tabs-track grid-cols-3">
             <button
               onClick={() => setActiveTab('videos')}
-              className={`rounded-full px-4 py-3 text-sm font-semibold transition ${activeTab === 'videos' ? 'bg-white text-red-600 shadow-sm' : 'text-neutral-500'}`}
+              className={`tab-button ${activeTab === 'videos' ? 'tab-button-active' : ''}`}
             >
               Videos
             </button>
             <button
               onClick={() => setActiveTab('github')}
-              className={`rounded-full px-4 py-3 text-sm font-semibold transition ${activeTab === 'github' ? 'bg-white text-red-600 shadow-sm' : 'text-neutral-500'}`}
+              className={`tab-button ${activeTab === 'github' ? 'tab-button-active' : ''}`}
             >
               GitHub
             </button>
             <button
               onClick={() => setActiveTab('add')}
-              className={`rounded-full px-4 py-3 text-sm font-semibold transition ${activeTab === 'add' ? 'bg-white text-red-600 shadow-sm' : 'text-neutral-500'}`}
+              className={`tab-button ${activeTab === 'add' ? 'tab-button-active' : ''}`}
             >
               Add Resource
             </button>
@@ -301,8 +301,9 @@ export default function AdminResourceSharingPage() {
 
               <div>
                 <label className="mb-2 block text-sm font-medium text-gray-700">Type</label>
-                <div className="flex gap-3">
-                  <label className={`rounded border px-3 py-2 ${formData.resource_type === 'video' ? 'bg-indigo-600 text-white' : 'bg-white'}`}>
+                <div className="tabs-shell mb-0">
+                  <div className="tabs-track grid-cols-2">
+                    <label className={`tab-button text-center ${formData.resource_type === 'video' ? 'tab-button-active' : ''}`}>
                     <input
                       type="radio"
                       name="type"
@@ -312,8 +313,8 @@ export default function AdminResourceSharingPage() {
                       className="hidden"
                     />
                     Video (YouTube)
-                  </label>
-                  <label className={`rounded border px-3 py-2 ${formData.resource_type === 'github' ? 'bg-indigo-600 text-white' : 'bg-white'}`}>
+                    </label>
+                    <label className={`tab-button text-center ${formData.resource_type === 'github' ? 'tab-button-active' : ''}`}>
                     <input
                       type="radio"
                       name="type"
@@ -323,7 +324,8 @@ export default function AdminResourceSharingPage() {
                       className="hidden"
                     />
                     GitHub Link
-                  </label>
+                    </label>
+                  </div>
                 </div>
               </div>
 

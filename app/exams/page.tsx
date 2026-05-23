@@ -30,6 +30,7 @@ export default function ExamsPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [activeTab, setActiveTab] = useState<'available' | 'results'>('available')
+  const completedResultsByExamId = new Map(results.map((result) => [result.exam_id, result]))
 
   useEffect(() => {
     const token = localStorage.getItem('auth_token')
@@ -89,31 +90,6 @@ export default function ExamsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Navigation */}
-      <nav className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <Link href="/dashboard" className="flex items-center gap-3">
-            <img 
-              src="https://zxkeolkojkoenkszekiy.supabase.co/storage/v1/object/public/math-club-images/Math%20Club%20Logo/math%20club%20logo.png" 
-              alt="Math Club Logo" 
-              className="h-10 w-auto object-contain"
-            />
-            <span className="text-2xl font-bold text-indigo-600">Math Club</span>
-          </Link>
-          <button
-            onClick={() => {
-              localStorage.removeItem('auth_token')
-              localStorage.removeItem('user_type')
-              localStorage.removeItem('user_id')
-              router.push('/')
-            }}
-            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-          >
-            Logout
-          </button>
-        </div>
-      </nav>
-
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -128,27 +104,21 @@ export default function ExamsPage() {
         )}
 
         {/* Tabs */}
-        <div className="flex gap-4 mb-8 border-b">
+        <div className="tabs-shell">
+          <div className="tabs-track grid-cols-2">
           <button
             onClick={() => setActiveTab('available')}
-            className={`pb-2 px-4 border-b-2 font-medium transition ${
-              activeTab === 'available'
-                ? 'border-indigo-600 text-indigo-600'
-                : 'border-transparent text-gray-600 hover:text-gray-900'
-            }`}
+            className={`tab-button ${activeTab === 'available' ? 'tab-button-active' : ''}`}
           >
             Available Exams
           </button>
           <button
             onClick={() => setActiveTab('results')}
-            className={`pb-2 px-4 border-b-2 font-medium transition ${
-              activeTab === 'results'
-                ? 'border-indigo-600 text-indigo-600'
-                : 'border-transparent text-gray-600 hover:text-gray-900'
-            }`}
+            className={`tab-button ${activeTab === 'results' ? 'tab-button-active' : ''}`}
           >
             My Results
           </button>
+          </div>
         </div>
 
         {/* Available Exams */}
@@ -157,6 +127,11 @@ export default function ExamsPage() {
             {exams.length > 0 ? (
               exams.map((exam) => (
                 <div key={exam.id} className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition">
+                  {completedResultsByExamId.has(exam.id) && (
+                    <div className="mb-4 inline-flex rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-800">
+                      Completed
+                    </div>
+                  )}
                   <div className="flex justify-between items-start mb-4">
                     <div className="flex-1">
                       <h3 className="text-xl font-bold text-gray-900">{exam.exam_name}</h3>
@@ -186,11 +161,19 @@ export default function ExamsPage() {
                     </div>
                   </div>
 
-                  <Link href={`/exams/${exam.id}`}>
-                    <button className="w-full px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium">
-                      Start Exam
-                    </button>
-                  </Link>
+                    {completedResultsByExamId.has(exam.id) ? (
+                      <Link href={`/exams/results/${completedResultsByExamId.get(exam.id)?.id}`}>
+                        <button className="w-full px-6 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 font-medium">
+                          View Paper
+                        </button>
+                      </Link>
+                    ) : (
+                      <Link href={`/exams/${exam.id}`}>
+                        <button className="w-full px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium">
+                          Start Exam
+                        </button>
+                      </Link>
+                    )}
                 </div>
               ))
             ) : (
@@ -245,6 +228,14 @@ export default function ExamsPage() {
                           {isPassed ? '✓ Passed' : '✗ Failed'}
                         </div>
                       </div>
+                    </div>
+
+                    <div className="mt-4">
+                      <Link href={`/exams/results/${result.id}`}>
+                        <button className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 text-sm font-medium">
+                          View Paper
+                        </button>
+                      </Link>
                     </div>
                   </div>
                 )

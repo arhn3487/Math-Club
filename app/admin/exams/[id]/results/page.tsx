@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
+import Link from 'next/link'
 
 interface ExamResult {
   id: number
@@ -182,7 +183,11 @@ export default function AdminExamResultsPage() {
                     return (
                       <tr key={result.id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 text-sm font-bold text-gray-900">{index + 1}</td>
-                        <td className="px-6 py-4 text-sm text-gray-900">{result.full_name}</td>
+                        <td className="px-6 py-4 text-sm text-gray-900">
+                          <Link href={`/exams/results/${result.id}`} className="font-medium text-indigo-600 hover:text-indigo-700 hover:underline">
+                            {result.full_name}
+                          </Link>
+                        </td>
                         <td className="px-6 py-4 text-sm text-gray-600">{result.student_id || 'N/A'}</td>
                         <td className="px-6 py-4 text-sm text-gray-600">{result.user_id}</td>
                         <td className="px-6 py-4 text-sm text-gray-900 font-medium">

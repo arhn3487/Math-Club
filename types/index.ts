@@ -331,7 +331,7 @@ export interface AuthUser {
   user_id: string
   full_name: string
   email: string
-  user_type: 'student' | 'admin' | 'pending'
+  user_type: 'student' | 'admin' | 'superuser' | 'pending'
   is_active: boolean
   is_approved: boolean
   email_verified: boolean

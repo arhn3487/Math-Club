@@ -5,7 +5,7 @@ export interface UserEntity {
   id: string
   user_id: string
   password_hash: string
-  user_type: 'student' | 'admin'
+  user_type: 'student' | 'admin' | 'superuser'
   full_name: string
   email: string
   is_active: boolean
@@ -28,7 +28,7 @@ export interface LoginResponseDTO {
   user?: {
     id: string
     user_id: string
-    user_type: 'student' | 'admin'
+    user_type: 'student' | 'admin' | 'superuser'
     full_name: string
     email: string
   }
@@ -37,7 +37,7 @@ export interface LoginResponseDTO {
 export interface UserProfileDTO {
   id: string
   user_id: string
-  user_type: 'student' | 'admin'
+  user_type: 'student' | 'admin' | 'superuser'
   full_name: string
   email: string
   is_active: boolean
@@ -48,13 +48,13 @@ export interface RegisterRequestDTO {
   password: string
   full_name: string
   email: string
-  user_type: 'student' | 'admin'
+  user_type: 'student' | 'admin' | 'superuser'
 }
 
 export interface AuthPayload {
   id: string
   user_id: string
-  user_type: 'student' | 'admin'
+  user_type: 'student' | 'admin' | 'superuser'
   iat?: number
   exp?: number
 }

@@ -5,7 +5,7 @@ import jwt from 'jsonwebtoken'
 async function verifyAdmin(token: string) {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key') as any
-    if (!decoded || decoded.user_type !== 'admin') {
+    if (!decoded || !['admin', 'superuser'].includes(decoded.user_type)) {
       return null
     }
     return decoded
@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
 
     const admin = await verifyAdmin(token)
     if (!admin) {
-      return NextResponse.json({ message: 'Forbidden' }, { status: 403 })
+      return NextResponse.json({ message: 'Admin access required' }, { status: 403 })
     }
 
     const supabase = getSupabaseAdmin()

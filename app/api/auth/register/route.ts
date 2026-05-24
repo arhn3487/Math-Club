@@ -30,11 +30,11 @@ export async function POST(request: NextRequest): Promise<NextResponse<LoginResp
 
     const payload = verifyToken(token)
 
-    if (!payload || payload.user_type !== 'admin') {
+    if (!payload || payload.user_type !== 'superuser') {
       return NextResponse.json(
         {
           success: false,
-          message: 'Unauthorized: Only admins can register new users',
+          message: 'Unauthorized: Only superusers can register new users',
         },
         { status: 403 }
       )

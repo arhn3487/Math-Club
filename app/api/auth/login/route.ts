@@ -37,15 +37,15 @@ export async function POST(request: NextRequest) {
         .single()
       user = data
       console.log('Searching student with student_id:', user_id, 'Found:', !!user)
-    } else if (user_type === 'admin') {
+    } else if (user_type === 'admin' || user_type === 'superuser') {
       const { data } = await admin
         .from('users')
         .select('*')
-        .eq('admin_id', user_id)
-        .eq('user_type', 'admin')
+        .or(`admin_id.eq.${user_id},user_id.eq.${user_id}`)
+        .eq('user_type', user_type)
         .single()
       user = data
-      console.log('Searching admin with admin_id:', user_id, 'Found:', !!user)
+      console.log(`Searching ${user_type} with admin_id/user_id:`, user_id, 'Found:', !!user)
     } else {
       return NextResponse.json(
         { success: false, message: 'Invalid user type' },

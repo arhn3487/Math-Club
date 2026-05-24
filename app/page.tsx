@@ -3,11 +3,15 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { AchievementCard } from '@/components/cards/FeatureCards'
+import { Achievement } from '@/types'
 
 export default function Home() {
   const router = useRouter()
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [achievements, setAchievements] = useState<Achievement[]>([])
+  const [achievementsLoading, setAchievementsLoading] = useState(true)
 
   const navItems = [
     //{ label: 'Batches', href: '/batches' },
@@ -46,6 +50,25 @@ export default function Home() {
     const token = localStorage.getItem('auth_token')
     setIsAuthenticated(!!token)
     setIsLoading(false)
+  }, [])
+
+  useEffect(() => {
+    const loadAchievements = async () => {
+      try {
+        setAchievementsLoading(true)
+        const response = await fetch('/api/achievements')
+        if (!response.ok) {
+          return
+        }
+
+        const data = await response.json()
+        setAchievements(Array.isArray(data) ? data : [])
+      } finally {
+        setAchievementsLoading(false)
+      }
+    }
+
+    loadAchievements()
   }, [])
 
   if (isLoading) {
@@ -209,6 +232,37 @@ export default function Home() {
               </p>
             </div>
           ))}
+        </div>
+      </section>
+
+      <section className="mono-section bg-neutral-50/70">
+        <div className="mono-container">
+          <div className="mb-8 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+            <div>
+              <span className="mono-badge">Achievements</span>
+              <h2 className="mt-4 text-3xl font-black tracking-tight text-neutral-950 md:text-5xl">
+                Club moments and events
+              </h2>
+              <p className="mt-3 max-w-2xl text-sm leading-7 text-neutral-600 md:text-base">
+                Public updates from club events, contests, and milestones appear here for everyone to see.
+              </p>
+            </div>
+            <Link href="/achievements" className="mono-button mono-button--light px-5 py-3 text-sm font-semibold">
+              View All
+            </Link>
+          </div>
+
+          {achievementsLoading ? (
+            <div className="mono-card p-8 text-center text-sm text-neutral-600">Loading achievements...</div>
+          ) : achievements.length === 0 ? (
+            <div className="mono-card p-8 text-center text-sm text-neutral-600">No achievements added yet.</div>
+          ) : (
+            <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+              {achievements.slice(0, 6).map((achievement) => (
+                <AchievementCard key={achievement.id} achievement={achievement} />
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

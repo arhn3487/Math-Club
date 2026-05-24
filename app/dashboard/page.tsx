@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { AdminNavigation } from '@/components/layout/AdminNavigation'
 
 interface DashboardData {
-  userType: 'student' | 'admin'
+  userType: 'student' | 'admin' | 'superuser'
   userName: string
   userId: string
   profileImage?: string
@@ -31,7 +31,7 @@ export default function DashboardPage() {
     }
 
     // Get user name from API or decode token
-    const decodedUserType = userType as 'student' | 'admin'
+    const decodedUserType = userType as 'student' | 'admin' | 'superuser'
     setDashboardData({
       userType: decodedUserType,
       userName: 'Welcome',
@@ -57,7 +57,8 @@ export default function DashboardPage() {
   }
 
   const isStudent = dashboardData.userType === 'student'
-  const isAdmin = dashboardData.userType === 'admin'
+  const isAdmin = dashboardData.userType === 'admin' || dashboardData.userType === 'superuser'
+  const isSuperuser = dashboardData.userType === 'superuser'
 
   const studentActions = [
     { label: 'Exams', href: '/exams', icon: '⌂' },
@@ -74,9 +75,17 @@ export default function DashboardPage() {
     { label: 'Notices', href: '/admin/notices', icon: '◌' },
   ]
 
+  const superuserActions = [
+    { label: 'Manage Members', href: '/admin/users', icon: '◫' },
+    { label: 'Manage Achievements', href: '/superuser/achievements', icon: '★' },
+    { label: 'Register User', href: '/admin/register', icon: '✚' },
+    { label: 'Approve Students', href: '/admin/users', icon: '✓' },
+    { label: 'Review Records', href: '/admin/exams', icon: '✎' },
+  ]
+
   return (
     <div className="page-shell">
-      {dashboardData.userType === 'admin' ? <AdminNavigation /> : null}
+      {isAdmin ? <AdminNavigation /> : null}
 
       <div className="mx-auto flex min-h-[calc(100vh-5.5rem)] max-w-7xl flex-col items-center justify-center px-4 py-16 text-center">
         <p className="text-4xl font-black uppercase tracking-tight text-neutral-900 sm:text-6xl lg:text-7xl">
@@ -102,8 +111,40 @@ export default function DashboardPage() {
         <p className="mt-3 max-w-4xl text-base leading-7 text-neutral-500 sm:text-xl">
           {isStudent
             ? 'Compete, learn, build, and grow with peers pushing the same limits as you.'
-            : 'Organize everything from one clean dashboard made for the club.'}
+            : isSuperuser
+              ? 'Superuser access gives you member control, approvals, and registration tools in one place.'
+              : 'Organize everything from one clean dashboard made for the club.'}
         </p>
+
+        {isSuperuser && (
+          <div className="mt-12 w-full max-w-5xl rounded-[2rem] border border-neutral-200 bg-white p-6 shadow-sm md:p-8">
+            <div className="mb-6 text-left">
+              <p className="text-xs font-bold uppercase tracking-[0.3em] text-neutral-500">Superuser Console</p>
+              <h2 className="mt-2 text-2xl font-black tracking-tight text-neutral-950">Member Control Center</h2>
+              <p className="mt-2 max-w-2xl text-sm leading-7 text-neutral-600">
+                This area is reserved for the superuser account and is separate from normal admin tools.
+              </p>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+              {superuserActions.map((action) => (
+                <Link
+                  key={action.href + action.label}
+                  href={action.href}
+                  className="group rounded-2xl border border-neutral-200 bg-neutral-50 p-5 text-left transition hover:-translate-y-0.5 hover:border-neutral-900 hover:bg-white"
+                >
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full border border-neutral-300 bg-white text-sm font-black text-neutral-900 transition group-hover:border-neutral-900">
+                    {action.icon}
+                  </div>
+                  <p className="mt-4 text-lg font-bold text-neutral-950">{action.label}</p>
+                  <p className="mt-1 text-sm leading-6 text-neutral-600">
+                    Open the superuser-only workflow for {action.label.toLowerCase()}.
+                  </p>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

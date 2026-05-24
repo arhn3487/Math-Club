@@ -8,7 +8,7 @@ interface User {
   user_id: string
   student_id?: string
   admin_id?: string
-  user_type: 'student' | 'admin'
+  user_type: 'student' | 'admin' | 'superuser'
   full_name: string
   email: string
   batch_year?: number
@@ -42,12 +42,14 @@ export default function AdminUsersPage() {
   const [batches, setBatches] = useState<number[]>([])
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
+  const [userType, setUserType] = useState<'student' | 'admin' | 'superuser'>('student')
 
   useEffect(() => {
     const token = localStorage.getItem('auth_token')
-    const userType = localStorage.getItem('user_type')
+    const storedUserType = localStorage.getItem('user_type') as 'student' | 'admin' | 'superuser' | null
+    setUserType(storedUserType)
 
-    if (!token || userType !== 'admin') {
+    if (!token || !storedUserType || !['admin', 'superuser'].includes(storedUserType)) {
       router.push('/login')
       return
     }
@@ -55,6 +57,8 @@ export default function AdminUsersPage() {
     fetchUsers()
     fetchPendingUsers()
   }, [router])
+
+  const canManageUsers = userType === 'superuser'
 
   const fetchUsers = async () => {
     try {
@@ -107,6 +111,8 @@ export default function AdminUsersPage() {
   }
 
   const handleDeleteUser = async (userId: string) => {
+    if (!canManageUsers) return
+
     try {
       const response = await fetch(`/api/admin/users/${userId}`, {
         method: 'DELETE',
@@ -128,6 +134,8 @@ export default function AdminUsersPage() {
   }
 
   const handleApprove = async (userId: string, studentId: string) => {
+    if (!canManageUsers) return
+
     setActionLoading(userId)
     setSuccessMessage('')
     try {
@@ -156,6 +164,8 @@ export default function AdminUsersPage() {
   }
 
   const handleReject = async (userId: string, studentId: string) => {
+    if (!canManageUsers) return
+
     if (!confirm(`Reject ${studentId}?`)) return
 
     setActionLoading(userId)
@@ -245,27 +255,38 @@ export default function AdminUsersPage() {
           ) : (
             <div className="space-y-4">
               {pendingUsers.map((user) => (
-                <div key={user.id} className="flex items-center justify-between gap-4 rounded-2xl border border-neutral-200 p-4">
+                <div
+                  key={user.id}
+                  className="flex flex-col gap-4 rounded-2xl border border-neutral-200 p-4 md:flex-row md:items-center md:justify-between"
+                >
                   <div>
                     <p className="font-semibold text-neutral-950">{user.full_name}</p>
                     <p className="text-sm text-neutral-600">{user.email}</p>
                     <p className="text-sm text-neutral-600">Student ID: {user.student_id || 'N/A'}</p>
                   </div>
                   <div className="flex gap-2">
-                    <button
-                      onClick={() => handleApprove(user.id, user.student_id || 'Unknown')}
-                      disabled={actionLoading === user.id}
-                      className="rounded-full border border-neutral-300 bg-white px-4 py-2 text-sm font-semibold text-neutral-900 transition hover:border-neutral-900 disabled:opacity-50"
-                    >
-                      Approve
-                    </button>
-                    <button
-                      onClick={() => handleReject(user.id, user.student_id || 'Unknown')}
-                      disabled={actionLoading === user.id}
-                      className="rounded-full border border-neutral-300 bg-white px-4 py-2 text-sm font-semibold text-neutral-900 transition hover:border-neutral-900 disabled:opacity-50"
-                    >
-                      Reject
-                    </button>
+                    {canManageUsers ? (
+                      <>
+                        <button
+                          onClick={() => handleApprove(user.id, user.student_id || 'Unknown')}
+                          disabled={actionLoading === user.id}
+                          className="rounded-full border border-neutral-300 bg-white px-4 py-2 text-sm font-semibold text-neutral-900 transition hover:border-neutral-900 disabled:opacity-50"
+                        >
+                          Approve
+                        </button>
+                        <button
+                          onClick={() => handleReject(user.id, user.student_id || 'Unknown')}
+                          disabled={actionLoading === user.id}
+                          className="rounded-full border border-neutral-300 bg-white px-4 py-2 text-sm font-semibold text-neutral-900 transition hover:border-neutral-900 disabled:opacity-50"
+                        >
+                          Reject
+                        </button>
+                      </>
+                    ) : (
+                      <span className="rounded-full border border-dashed border-neutral-300 px-4 py-2 text-sm font-semibold text-neutral-500">
+                        View only
+                      </span>
+                    )}
                   </div>
                 </div>
               ))}
@@ -296,6 +317,7 @@ export default function AdminUsersPage() {
                 <option value="all">All Types</option>
                 <option value="student">Students</option>
                 <option value="admin">Admins</option>
+                <option value="superuser">Superusers</option>
               </select>
             </div>
             <div>
@@ -350,10 +372,18 @@ export default function AdminUsersPage() {
                       <td className="px-6 py-4 text-sm">
                         <span
                           className={`px-2 py-1 rounded text-white text-xs font-medium ${
-                            user.user_type === 'admin' ? 'bg-purple-600' : 'bg-blue-600'
+                            user.user_type === 'superuser'
+                              ? 'bg-amber-600'
+                              : user.user_type === 'admin'
+                                ? 'bg-purple-600'
+                                : 'bg-blue-600'
                           }`}
                         >
-                          {user.user_type === 'admin' ? 'Admin' : 'Student'}
+                          {user.user_type === 'superuser'
+                            ? 'Superuser'
+                            : user.user_type === 'admin'
+                              ? 'Admin'
+                              : 'Student'}
                         </span>
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-600">{user.batch_year || 'N/A'}</td>
@@ -369,12 +399,16 @@ export default function AdminUsersPage() {
                         </span>
                       </td>
                       <td className="px-6 py-4 text-sm">
-                        <button
-                          onClick={() => setDeleteConfirm(user.id)}
-                          className="text-red-600 hover:text-red-900 font-medium"
-                        >
-                          Delete
-                        </button>
+                        {canManageUsers ? (
+                          <button
+                            onClick={() => setDeleteConfirm(user.id)}
+                            className="text-red-600 hover:text-red-900 font-medium"
+                          >
+                            Delete
+                          </button>
+                        ) : (
+                          <span className="text-sm text-neutral-400">Superuser only</span>
+                        )}
                       </td>
                     </tr>
                   ))

@@ -5,7 +5,7 @@ import jwt from 'jsonwebtoken'
 async function verifyAdmin(token: string) {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key') as any
-    if (!decoded || decoded.user_type !== 'admin') {
+    if (!decoded || decoded.user_type !== 'superuser') {
       return null
     }
     return decoded
@@ -26,7 +26,7 @@ export async function POST(
 
     const admin = await verifyAdmin(token)
     if (!admin) {
-      return NextResponse.json({ message: 'Forbidden' }, { status: 403 })
+      return NextResponse.json({ message: 'Superuser access required' }, { status: 403 })
     }
 
     const body = await request.json()

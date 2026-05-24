@@ -11,7 +11,7 @@ interface RegistrationError {
 
 export default function AdminRegisterPage() {
   const router = useRouter()
-  const [isAdmin, setIsAdmin] = useState(false)
+  const [isSuperuser, setIsSuperuser] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [formData, setFormData] = useState({
     user_id: '',
@@ -29,12 +29,12 @@ export default function AdminRegisterPage() {
         const token = localStorage.getItem('auth_token')
         const userType = localStorage.getItem('user_type')
 
-        if (!token || userType !== 'admin') {
+        if (!token || userType !== 'superuser') {
           router.push('/login')
           return
         }
 
-        setIsAdmin(true)
+        setIsSuperuser(true)
         setIsLoading(false)
       } catch (error) {
         console.error('Verification error:', error)
@@ -180,7 +180,7 @@ export default function AdminRegisterPage() {
     )
   }
 
-  if (!isAdmin) {
+  if (!isSuperuser) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">

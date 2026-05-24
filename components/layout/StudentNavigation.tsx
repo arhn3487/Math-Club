@@ -7,7 +7,7 @@ import { usePathname, useRouter } from 'next/navigation'
 const studentLinks = [
   { label: 'Exams', href: '/exams', icon: '✎' },
   { label: 'Resources', href: '/resource-sharing', icon: '◔' },
-  { label: 'Alumni', href: '/alumni', icon: '◉' },
+  { label: 'Batchmate', href: '/alumni', icon: '◉' },
   { label: 'Notices', href: '/notices', icon: '◌' },
 ]
 

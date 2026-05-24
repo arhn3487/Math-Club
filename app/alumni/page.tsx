@@ -100,16 +100,16 @@ export default function AlumniPage() {
     <div className="min-h-screen w-full bg-gray-50">
       <div className="w-full max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
-        <div className="mb-8">
+        {/* <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">
-            {userType === 'student' ? 'Batchmates' : 'All Members'}
+            {userType === 'student' ? 'Batchmatess' : 'All Members'}
           </h1>
           <p className="text-gray-600 mt-2">
             {userType === 'student'
               ? 'Connect with your batch members'
               : 'Manage and view all members in the community'}
           </p>
-        </div>
+        </div> */}
 
         {error && (
           <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded text-red-700">
@@ -119,7 +119,7 @@ export default function AlumniPage() {
 
         {/* Filters */}
         <div className="bg-white rounded-lg shadow mb-6 p-6">
-          <div className="grid md:grid-cols-2 gap-4">
+          <div className="grid gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Search</label>
               <input
@@ -156,27 +156,35 @@ export default function AlumniPage() {
             filteredMembers.map((member) => (
               <div
                 key={member.id}
-                className="bg-white rounded-lg shadow hover:shadow-lg transition p-4 flex items-center gap-6"
+                className="flex w-full flex-col gap-4 rounded-lg bg-white p-4 shadow transition hover:shadow-lg md:flex-row md:items-center md:gap-8 md:px-6"
               >
-                {member.profile_image_url ? (
-                  <img
-                    src={member.profile_image_url}
-                    alt={member.full_name}
-                    className="w-12 h-12 rounded-full flex-shrink-0 object-cover"
-                  />
-                ) : (
-                  <div className="w-12 h-12 rounded-full flex-shrink-0 bg-indigo-600 flex items-center justify-center text-white font-bold">
-                    {member.full_name.charAt(0)}
-                  </div>
-                )}
+                <div className="flex items-center gap-4 md:flex-shrink-0 md:gap-6">
+                  {member.profile_image_url ? (
+                    <img
+                      src={member.profile_image_url}
+                      alt={member.full_name}
+                      className="h-14 w-14 flex-shrink-0 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-indigo-600 font-bold text-white">
+                      {member.full_name.charAt(0)}
+                    </div>
+                  )}
+                </div>
 
-                <div className="flex-1 flex items-center gap-6">
-                  <h3 className="text-base font-semibold text-gray-900 min-w-fit">{member.full_name}</h3>
-                  <p className="text-gray-600 text-sm">
-                    {member.user_type === 'admin' 
-                      ? `Admin ID: ${member.admin_id}` 
-                      : `Student ID: ${member.student_id}`
-                    }
+                <div className="min-w-0 md:flex-1 md:text-center">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500 md:hidden">Name</p>
+                  <h3 className="truncate text-sm font-normal text-gray-900 md:text-base">{member.full_name}</h3>
+                </div>
+
+                <div className="min-w-0 md:flex-shrink-0 md:text-right">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500 md:hidden">
+                    {member.user_type === 'admin' ? 'Admin ID' : 'Student ID'}
+                  </p>
+                  <p className="truncate text-sm text-gray-600 md:text-base md:whitespace-nowrap">
+                    {member.user_type === 'admin'
+                      ? `${member.admin_id || 'Not assigned'}`
+                      : `${member.student_id || 'Not assigned'}`}
                   </p>
                 </div>
               </div>

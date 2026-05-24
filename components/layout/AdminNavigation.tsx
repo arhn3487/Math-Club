@@ -11,17 +11,23 @@ const adminLinks = [
   { label: 'Notices', href: '/admin/notices', icon: '◌' },
 ]
 
+const superuserLinks = [
+  { label: 'Achievements', href: '/superuser/achievements', icon: '★' },
+]
+
 export function AdminNavigation() {
   const pathname = usePathname()
   const router = useRouter()
   const [profileImage, setProfileImage] = useState<string | null>(null)
   const [profileLabel, setProfileLabel] = useState('A')
+  const [userType, setUserType] = useState<string | null>(null)
 
   useEffect(() => {
     setProfileImage(localStorage.getItem('profile_image_url'))
     const fullName = localStorage.getItem('full_name')
     const userId = localStorage.getItem('user_id')
     setProfileLabel((fullName || userId || 'A').charAt(0).toUpperCase())
+    setUserType(localStorage.getItem('user_type'))
   }, [])
 
   const isActive = (href: string) =>
@@ -52,6 +58,28 @@ export function AdminNavigation() {
 
         <div className="hidden flex-1 items-center justify-center gap-8 lg:flex">
           {adminLinks.map((item) => {
+            const active = isActive(item.href)
+
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="mono-nav-button group inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-semibold text-neutral-900 transition"
+              >
+                <span className={[
+                  'flex h-5 w-5 items-center justify-center rounded-full border text-[10px] font-bold transition',
+                  active
+                    ? 'border-neutral-900 text-neutral-900'
+                    : 'border-neutral-300 text-neutral-900 group-hover:border-neutral-900 group-hover:text-neutral-900',
+                ].join(' ')}>
+                  {item.icon}
+                </span>
+                <span>{item.label}</span>
+              </Link>
+            )
+          })}
+
+          {userType === 'superuser' && superuserLinks.map((item) => {
             const active = isActive(item.href)
 
             return (

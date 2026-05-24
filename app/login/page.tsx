@@ -15,7 +15,7 @@ export default function LoginPage() {
   const [formData, setFormData] = useState({
     user_id: '',
     password: '',
-    user_type: 'student' as 'student' | 'admin',
+    user_type: 'student' as 'student' | 'admin' | 'superuser',
   })
   const [errors, setErrors] = useState<LoginError[]>([])
   const [isLoading, setIsLoading] = useState(false)
@@ -199,13 +199,26 @@ export default function LoginPage() {
                 >
                   Admin
                 </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFormData(prev => ({ ...prev, user_type: 'superuser' }))
+                  }}
+                  className={`mono-button px-3 py-3 text-sm font-semibold ${
+                    formData.user_type === 'superuser'
+                      ? ''
+                      : 'mono-button--light'
+                  }`}
+                >
+                  Superuser
+                </button>
               </div>
             </div>
 
             {/* User ID Field */}
             <div>
               <label htmlFor="user_id" className="mb-1 block text-sm font-semibold text-neutral-700">
-                {formData.user_type === 'student' ? 'Student ID' : 'Admin ID'}
+                {formData.user_type === 'student' ? 'Student ID' : formData.user_type === 'superuser' ? 'Superuser ID' : 'Admin ID'}
               </label>
               <input
                 type="text"
@@ -215,7 +228,13 @@ export default function LoginPage() {
                 onChange={handleChange}
                 disabled={isLoading}
                 className={`mono-input ${getFieldError('user_id') ? 'border-red-500' : ''}`}
-                placeholder={formData.user_type === 'student' ? 'e.g., STU001' : 'e.g., ADM001'}
+                placeholder={
+                  formData.user_type === 'student'
+                    ? 'e.g., STU001'
+                    : formData.user_type === 'superuser'
+                      ? 'e.g., SU001'
+                      : 'e.g., ADM001'
+                }
               />
               {getFieldError('user_id') && (
                 <p className="mt-1 text-sm text-neutral-600">{getFieldError('user_id')}</p>

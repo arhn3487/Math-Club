@@ -46,7 +46,7 @@ export function StudentNavigation() {
           />
         </Link>
 
-        <div className="hidden flex-1 items-center justify-center gap-8 lg:flex">
+        <div className="flex flex-1 flex-wrap items-center justify-center gap-2 lg:gap-8">
           {studentLinks.map((item) => {
             const active = isActive(item.href)
 
@@ -54,7 +54,7 @@ export function StudentNavigation() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="mono-nav-button group inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-semibold text-neutral-900 transition"
+                className="mono-nav-button group inline-flex items-center gap-2 rounded-full px-2 py-2 text-xs font-semibold text-neutral-900 transition sm:px-3 sm:text-sm"
               >
                 <span
                   className={[

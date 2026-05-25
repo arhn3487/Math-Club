@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabaseClient'
 import { verifyToken, hashPassword } from '@/lib/auth'
 
+export const dynamic = 'force-dynamic'
+
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp']
 

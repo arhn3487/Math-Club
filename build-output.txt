@@ -1,0 +1,326 @@
+﻿
+> math-club-website@0.1.0 build
+> next build
+
+  Γû▓ Next.js 14.2.35
+  - Environments: .env.local
+
+   Creating an optimized production build ...
+ Γ£ô Compiled successfully
+   Skipping validation of types
+   Skipping linting
+   Collecting page data ...
+   Generating static pages (0/51) ...
+node.exe : Error: B [Error]: Dynamic server usage: Route 
+/api/admin/pending-signups couldn't be rendered statically because it used 
+`request.headers`. See more info here: 
+https://nextjs.org/docs/messages/dynamic-server-error
+At line:1 char:1
++ & "D:\Lib\nodejs/node.exe" "D:\Lib\nodejs/node_modules/npm/bin/npm-cl ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Error: B [Error...ic-server-error 
+   :String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+    at V (D:\Math Club Website\node_modules\next\dist\compiled\next-server\app-
+route.runtime.prod.js:6:21778)
+    at Object.get (D:\Math Club Website\node_modules\next\dist\compiled\next-se
+rver\app-route.runtime.prod.js:6:29465)
+    at l (D:\Math Club 
+Website\.next\server\app\api\admin\pending-signups\route.js:1:700)
+    at D:\Math Club Website\node_modules\next\dist\compiled\next-server\app-rou
+te.runtime.prod.js:6:38417
+    at D:\Math Club 
+Website\node_modules\next\dist\server\lib\trace\tracer.js:140:36
+    at NoopContextManager.with (D:\Math Club 
+Website\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:7062)
+    at ContextAPI.with (D:\Math Club 
+Website\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:518)
+    at NoopTracer.startActiveSpan (D:\Math Club 
+Website\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:18093)
+    at ProxyTracer.startActiveSpan (D:\Math Club 
+Website\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:18854)
+    at D:\Math Club 
+Website\node_modules\next\dist\server\lib\trace\tracer.js:122:103 {
+  description: "Route /api/admin/pending-signups couldn't be rendered 
+statically because it used `request.headers`. See more info here: 
+https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Token verification error: B [Error]: Dynamic server usage: Route 
+/api/auth/verify couldn't be rendered statically because it used 
+`request.headers`. See more info here: 
+https://nextjs.org/docs/messages/dynamic-server-error
+    at V (D:\Math Club Website\node_modules\next\dist\compiled\next-server\app-
+route.runtime.prod.js:6:21778)
+    at Object.get (D:\Math Club Website\node_modules\next\dist\compiled\next-se
+rver\app-route.runtime.prod.js:6:29465)
+    at c (D:\Math Club Website\.next\server\app\api\auth\verify\route.js:1:687)
+    at D:\Math Club Website\node_modules\next\dist\compiled\next-server\app-rou
+te.runtime.prod.js:6:38417
+    at D:\Math Club 
+Website\node_modules\next\dist\server\lib\trace\tracer.js:140:36
+    at NoopContextManager.with (D:\Math Club 
+Website\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:7062)
+    at ContextAPI.with (D:\Math Club 
+Website\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:518)
+    at NoopTracer.startActiveSpan (D:\Math Club 
+Website\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:18093)
+    at ProxyTracer.startActiveSpan (D:\Math Club 
+Website\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:18854)
+    at D:\Math Club 
+Website\node_modules\next\dist\server\lib\trace\tracer.js:122:103 {
+  description: "Route /api/auth/verify couldn't be rendered statically because 
+it used `request.headers`. See more info here: 
+https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+   Generating static pages (12/51) 
+Error fetching recordings: B [Error]: Dynamic server usage: Route 
+/api/class-recordings couldn't be rendered statically because it used 
+`request.headers`. See more info here: 
+https://nextjs.org/docs/messages/dynamic-server-error
+    at V (D:\Math Club Website\node_modules\next\dist\compiled\next-server\app-
+route.runtime.prod.js:6:21778)
+    at Object.get (D:\Math Club Website\node_modules\next\dist\compiled\next-se
+rver\app-route.runtime.prod.js:6:29465)
+    at d (D:\Math Club 
+Website\.next\server\app\api\class-recordings\route.js:1:841)
+    at D:\Math Club Website\node_modules\next\dist\compiled\next-server\app-rou
+te.runtime.prod.js:6:38417
+    at D:\Math Club 
+Website\node_modules\next\dist\server\lib\trace\tracer.js:140:36
+    at NoopContextManager.with (D:\Math Club 
+Website\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:7062)
+    at ContextAPI.with (D:\Math Club 
+Website\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:518)
+    at NoopTracer.startActiveSpan (D:\Math Club 
+Website\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:18093)
+    at ProxyTracer.startActiveSpan (D:\Math Club 
+Website\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:18854)
+    at D:\Math Club 
+Website\node_modules\next\dist\server\lib\trace\tracer.js:122:103 {
+  description: "Route /api/class-recordings couldn't be rendered statically 
+because it used `request.headers`. See more info here: 
+https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Error fetching results: B [Error]: Dynamic server usage: Route 
+/api/exams/results couldn't be rendered statically because it used 
+`request.headers`. See more info here: 
+https://nextjs.org/docs/messages/dynamic-server-error
+    at V (D:\Math Club Website\node_modules\next\dist\compiled\next-server\app-
+route.runtime.prod.js:6:21778)
+    at Object.get (D:\Math Club Website\node_modules\next\dist\compiled\next-se
+rver\app-route.runtime.prod.js:6:29465)
+    at m (D:\Math Club 
+Website\.next\server\app\api\exams\results\route.js:1:841)
+    at D:\Math Club Website\node_modules\next\dist\compiled\next-server\app-rou
+te.runtime.prod.js:6:38417
+    at D:\Math Club 
+Website\node_modules\next\dist\server\lib\trace\tracer.js:140:36
+    at NoopContextManager.with (D:\Math Club 
+Website\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:7062)
+    at ContextAPI.with (D:\Math Club 
+Website\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:518)
+    at NoopTracer.startActiveSpan (D:\Math Club 
+Website\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:18093)
+    at ProxyTracer.startActiveSpan (D:\Math Club 
+Website\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:18854)
+    at D:\Math Club 
+Website\node_modules\next\dist\server\lib\trace\tracer.js:122:103 {
+  description: "Route /api/exams/results couldn't be rendered statically 
+because it used `request.headers`. See more info here: 
+https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Error fetching exams: B [Error]: Dynamic server usage: Route /api/exams 
+couldn't be rendered statically because it used `request.headers`. See more 
+info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at V (D:\Math Club Website\node_modules\next\dist\compiled\next-server\app-
+route.runtime.prod.js:6:21778)
+    at Object.get (D:\Math Club Website\node_modules\next\dist\compiled\next-se
+rver\app-route.runtime.prod.js:6:29465)
+    at d (D:\Math Club Website\.next\server\app\api\exams\route.js:1:840)
+    at D:\Math Club Website\node_modules\next\dist\compiled\next-server\app-rou
+te.runtime.prod.js:6:38417
+    at D:\Math Club 
+Website\node_modules\next\dist\server\lib\trace\tracer.js:140:36
+    at NoopContextManager.with (D:\Math Club 
+Website\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:7062)
+    at ContextAPI.with (D:\Math Club 
+Website\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:518)
+    at NoopTracer.startActiveSpan (D:\Math Club 
+Website\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:18093)
+    at ProxyTracer.startActiveSpan (D:\Math Club 
+Website\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:18854)
+    at D:\Math Club 
+Website\node_modules\next\dist\server\lib\trace\tracer.js:122:103 {
+  description: "Route /api/exams couldn't be rendered statically because it 
+used `request.headers`. See more info here: 
+https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Error fetching members: B [Error]: Dynamic server usage: Route /api/members 
+couldn't be rendered statically because it used `request.headers`. See more 
+info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at V (D:\Math Club Website\node_modules\next\dist\compiled\next-server\app-
+route.runtime.prod.js:6:21778)
+    at Object.get (D:\Math Club Website\node_modules\next\dist\compiled\next-se
+rver\app-route.runtime.prod.js:6:29465)
+    at c (D:\Math Club Website\.next\server\app\api\members\route.js:1:841)
+    at D:\Math Club Website\node_modules\next\dist\compiled\next-server\app-rou
+te.runtime.prod.js:6:38417
+    at D:\Math Club 
+Website\node_modules\next\dist\server\lib\trace\tracer.js:140:36
+    at NoopContextManager.with (D:\Math Club 
+Website\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:7062)
+    at ContextAPI.with (D:\Math Club 
+Website\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:518)
+    at NoopTracer.startActiveSpan (D:\Math Club 
+Website\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:18093)
+    at ProxyTracer.startActiveSpan (D:\Math Club 
+Website\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:18854)
+    at D:\Math Club 
+Website\node_modules\next\dist\server\lib\trace\tracer.js:122:103 {
+  description: "Route /api/members couldn't be rendered statically because it 
+used `request.headers`. See more info here: 
+https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Error fetching pending users: B [Error]: Dynamic server usage: Route 
+/api/admin/approvals couldn't be rendered statically because it used 
+`request.headers`. See more info here: 
+https://nextjs.org/docs/messages/dynamic-server-error
+    at V (D:\Math Club Website\node_modules\next\dist\compiled\next-server\app-
+route.runtime.prod.js:6:21778)
+    at Object.get (D:\Math Club Website\node_modules\next\dist\compiled\next-se
+rver\app-route.runtime.prod.js:6:29465)
+    at c (D:\Math Club 
+Website\.next\server\app\api\admin\approvals\route.js:1:887)
+    at D:\Math Club Website\node_modules\next\dist\compiled\next-server\app-rou
+te.runtime.prod.js:6:38417
+    at D:\Math Club 
+Website\node_modules\next\dist\server\lib\trace\tracer.js:140:36
+    at NoopContextManager.with (D:\Math Club 
+Website\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:7062)
+    at ContextAPI.with (D:\Math Club 
+Website\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:518)
+    at NoopTracer.startActiveSpan (D:\Math Club 
+Website\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:18093)
+    at ProxyTracer.startActiveSpan (D:\Math Club 
+Website\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:18854)
+    at D:\Math Club 
+Website\node_modules\next\dist\server\lib\trace\tracer.js:122:103 {
+  description: "Route /api/admin/approvals couldn't be rendered statically 
+because it used `request.headers`. See more info here: 
+https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Error fetching notices: B [Error]: Dynamic server usage: Route /api/notices 
+couldn't be rendered statically because it used `request.headers`. See more 
+info here: https://nextjs.org/docs/messages/dynamic-server-error
+   Generating static pages (25/51) 
+    at V (D:\Math Club Website\node_modules\next\dist\compiled\next-server\app-
+route.runtime.prod.js:6:21778)
+    at Object.get (D:\Math Club Website\node_modules\next\dist\compiled\next-se
+rver\app-route.runtime.prod.js:6:29465)
+    at d (D:\Math Club Website\.next\server\app\api\notices\route.js:1:841)
+    at D:\Math Club Website\node_modules\next\dist\compiled\next-server\app-rou
+te.runtime.prod.js:6:38417
+    at D:\Math Club 
+Website\node_modules\next\dist\server\lib\trace\tracer.js:140:36
+    at NoopContextManager.with (D:\Math Club 
+Website\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:7062)
+    at ContextAPI.with (D:\Math Club 
+Website\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:518)
+    at NoopTracer.startActiveSpan (D:\Math Club 
+Website\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:18093)
+    at ProxyTracer.startActiveSpan (D:\Math Club 
+Website\node_modules\next\dist\compiled\@opentelemetry\api\index.js:1:18854)
+    at D:\Math Club 
+Website\node_modules\next\dist\server\lib\trace\tracer.js:122:103 {
+  description: "Route /api/notices couldn't be rendered statically because it 
+used `request.headers`. See more info here: 
+https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+   Generating static pages (38/51) 
+ Γ£ô Generating static pages (51/51)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                    Size     First Load JS
+Γöî Γùï /                                          3.46 kB        99.5 kB
+Γö£ Γùï /_not-found                                873 B          88.2 kB
+Γö£ Γùï /achievements                              1.39 kB        97.5 kB
+Γö£ ╞Æ /achievements/[id]                         1.64 kB        97.7 kB
+Γö£ Γùï /admin/approvals                           437 B          87.8 kB
+Γö£ Γùï /admin/class-recordings                    445 B          87.8 kB
+Γö£ Γùï /admin/exams                               3.17 kB        99.2 kB
+Γö£ ╞Æ /admin/exams/[id]/results                  2.11 kB        98.2 kB
+Γö£ Γùï /admin/notices                             2.34 kB        89.7 kB
+Γö£ Γùï /admin/register                            2.05 kB         112 kB
+Γö£ Γùï /admin/resource-sharing                    3.06 kB        90.4 kB
+Γö£ Γùï /admin/users                               2.81 kB        90.1 kB
+Γö£ Γùï /alumni                                    1.8 kB         89.1 kB
+Γö£ ╞Æ /alumni/[id]                               1.95 kB          98 kB
+Γö£ ╞Æ /api/achievements                          0 B                0 B
+Γö£ ╞Æ /api/admin/approvals                       0 B                0 B
+Γö£ ╞Æ /api/admin/approvals/[userId]              0 B                0 B
+Γö£ ╞Æ /api/admin/approve-signup                  0 B                0 B
+Γö£ ╞Æ /api/admin/class-recordings                0 B                0 B
+Γö£ ╞Æ /api/admin/class-recordings/[recordingId]  0 B                0 B
+Γö£ ╞Æ /api/admin/exams                           0 B                0 B
+Γö£ ╞Æ /api/admin/exams/[examId]                  0 B                0 B
+Γö£ ╞Æ /api/admin/exams/[examId]/results          0 B                0 B
+Γö£ ╞Æ /api/admin/notices                         0 B                0 B
+Γö£ ╞Æ /api/admin/notices/[noticeId]              0 B                0 B
+Γö£ ╞Æ /api/admin/pending-signups                 0 B                0 B
+Γö£ ╞Æ /api/admin/resource-sharing                0 B                0 B
+Γö£ ╞Æ /api/admin/users                           0 B                0 B
+Γö£ ╞Æ /api/admin/users/[userId]                  0 B                0 B
+Γö£ ╞Æ /api/alumni                                0 B                0 B
+Γö£ ╞Æ /api/auth/login                            0 B                0 B
+Γö£ ╞Æ /api/auth/register                         0 B                0 B
+Γö£ ╞Æ /api/auth/signup                           0 B                0 B
+Γö£ ╞Æ /api/auth/verify                           0 B                0 B
+Γö£ ╞Æ /api/auth/verify-email                     0 B                0 B
+Γö£ ╞Æ /api/batches                               0 B                0 B
+Γö£ ╞Æ /api/class-recordings                      0 B                0 B
+Γö£ ╞Æ /api/contests                              0 B                0 B
+Γö£ ╞Æ /api/courses                               0 B                0 B
+Γö£ ╞Æ /api/exams                                 0 B                0 B
+Γö£ ╞Æ /api/exams/[examId]                        0 B                0 B
+Γö£ ╞Æ /api/exams/[examId]/submit                 0 B                0 B
+Γö£ ╞Æ /api/exams/results                         0 B                0 B
+Γö£ ╞Æ /api/exams/results/[resultId]              0 B                0 B
+Γö£ ╞Æ /api/members                               0 B                0 B
+Γö£ ╞Æ /api/notices                               0 B                0 B
+Γö£ ╞Æ /api/profile                               0 B                0 B
+Γö£ ╞Æ /api/resource-folders                      0 B                0 B
+Γö£ ╞Æ /api/resource-sharing                      0 B                0 B
+Γö£ ╞Æ /api/uploads/achievement-image             0 B                0 B
+Γö£ ╞Æ /api/uploads/profile-image                 0 B                0 B
+Γö£ ╞Æ /api/users                                 0 B                0 B
+Γö£ Γùï /class-recordings                          1.69 kB          89 kB
+Γö£ Γùï /dashboard                                 2.59 kB        98.6 kB
+Γö£ Γùï /exams                                     1.94 kB          98 kB
+Γö£ ╞Æ /exams/[id]                                2.56 kB        98.6 kB
+Γö£ ╞Æ /exams/results/[resultId]                  1.74 kB        97.8 kB
+Γö£ Γùï /login                                     2.04 kB         121 kB
+Γö£ Γùï /notices                                   1.55 kB        88.9 kB
+Γö£ Γùï /profile                                   2.26 kB        98.3 kB
+Γö£ Γùï /resource-sharing                          2.25 kB        89.6 kB
+Γö£ Γùï /signup                                    2.21 kB        98.3 kB
+Γö£ Γùï /superuser/achievements                    2.29 kB        89.6 kB
+Γöö Γùï /verify-email                              1.18 kB        97.2 kB
++ First Load JS shared by all                  87.3 kB
+  Γö£ chunks/117-47ac579044418ede.js             31.7 kB
+  Γö£ chunks/fd9d1056-27f629ebb36ab430.js        53.6 kB
+  Γöö other shared chunks (total)                1.95 kB
+
+
+Γùï  (Static)   prerendered as static content
+╞Æ  (Dynamic)  server-rendered on demand
+

@@ -33,7 +33,7 @@ export default function AdminNoticesPage() {
     const token = localStorage.getItem('auth_token')
     const userType = localStorage.getItem('user_type')
 
-    if (!token || userType !== 'admin') {
+    if (!token || (userType !== 'admin' && userType !== 'superuser')) {
       router.push('/login')
       return
     }

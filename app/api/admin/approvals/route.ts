@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
   try {
     const authHeader = request.headers.get('authorization')
     const token = authHeader?.split(' ')[1]
-    
+
     if (!token) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
     }
@@ -30,7 +30,6 @@ export async function GET(request: NextRequest) {
 
     const supabase = getSupabaseAdmin()
 
-    // Get all unapproved students
     const { data: users, error } = await supabase
       .from('users')
       .select('id, user_id, full_name, email, student_id, batch_year, profile_image_url, created_at')
@@ -44,7 +43,6 @@ export async function GET(request: NextRequest) {
     }
 
     console.log('Fetched pending users:', users)
-    
     return NextResponse.json({ users: users || [] })
   } catch (error) {
     console.error('Error fetching pending users:', error)

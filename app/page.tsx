@@ -21,31 +21,6 @@ export default function Home() {
     { label: 'Alumni', href: '/alumni' },
   ]
 
-  const features = [
-    {
-      title: 'Learn and Practice',
-      description:
-        'Access study materials, recordings, and practice problems in one clean workspace.',
-    },
-    {
-      title: 'Take Exams',
-      description:
-        'Attempt MCQ exams with clear results, structured review, and progress tracking.',
-    },
-    {
-      title: 'Connect with Members',
-      description:
-        'Stay close to your batch, alumni, and club updates with a simple information flow.',
-    },
-  ]
-
-  const stats = [
-    { value: '500+', label: 'Active Members' },
-    { value: '100+', label: 'Practice Problems' },
-    { value: '50+', label: 'Video Tutorials' },
-    { value: '20+', label: 'Expert Mentors' },
-  ]
-
   useEffect(() => {
     const token = localStorage.getItem('auth_token')
     setIsAuthenticated(!!token)
@@ -167,71 +142,16 @@ export default function Home() {
             />
           </div>
           <p className="mx-auto mt-8 max-w-2xl text-base leading-8 text-neutral-600 md:text-lg">
-            A clean, structured space for algorithms, problem solving, and collaborative learning.
-            Compete, learn, build, and grow with peers pushing the same limits as you.
+            A focused club space for news, events, alumni updates, and public highlights.
           </p>
           <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Link href="/signup" className="mono-button px-8 py-4 text-base font-semibold">
               Join Now
             </Link>
-            <Link href="/dashboard" className="mono-button mono-button--light px-8 py-4 text-base font-semibold">
-              Explore Platform
+            <Link href="/achievements" className="mono-button mono-button--light px-8 py-4 text-base font-semibold">
+              View Achievements
             </Link>
           </div>
-        </div>
-      </section>
-
-      <section className="mono-section border-t border-neutral-200 bg-neutral-50/70">
-        <div className="mono-container grid gap-6 md:grid-cols-3">
-          {features.map((feature) => (
-            <article key={feature.title} className="mono-card mono-card-hover p-8">
-              <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-full border border-neutral-300 text-sm font-bold text-neutral-700">
-                0{features.indexOf(feature) + 1}
-              </div>
-              <h2 className="text-2xl font-bold tracking-tight text-neutral-950">
-                {feature.title}
-              </h2>
-              <p className="mt-4 text-sm leading-7 text-neutral-600">
-                {feature.description}
-              </p>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="mono-section">
-        <div className="mono-container grid gap-6 md:grid-cols-2">
-          <div className="mono-card mono-card-hover p-8 md:p-10">
-            <span className="mono-badge">Class Recordings</span>
-            <h3 className="mt-6 text-3xl font-black tracking-tight text-neutral-950">
-              Organized, searchable learning
-            </h3>
-            <p className="mt-4 text-sm leading-7 text-neutral-600">
-              Access class sessions, download resources, and review everything in a quiet black-and-white interface.
-            </p>
-          </div>
-          <div className="mono-card mono-card-hover p-8 md:p-10">
-            <span className="mono-badge">Advanced Exams</span>
-            <h3 className="mt-6 text-3xl font-black tracking-tight text-neutral-950">
-              Clear progress and result flow
-            </h3>
-            <p className="mt-4 text-sm leading-7 text-neutral-600">
-              Randomized exams, instant feedback, and structured analytics, all without visual noise.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <section className="border-y border-neutral-200 bg-white">
-        <div className="mono-container grid grid-cols-2 gap-4 py-10 md:grid-cols-4">
-          {stats.map((item) => (
-            <div key={item.label} className="rounded-2xl border border-neutral-200 px-4 py-6 text-center">
-              <div className="text-3xl font-black text-neutral-950">{item.value}</div>
-              <p className="mt-2 text-xs font-medium uppercase tracking-[0.22em] text-neutral-500">
-                {item.label}
-              </p>
-            </div>
-          ))}
         </div>
       </section>
 
@@ -270,10 +190,10 @@ export default function Home() {
         <div className="mono-container">
           <div className="mono-surface rounded-[2rem] px-8 py-10 text-center md:px-12 md:py-14">
             <h2 className="text-3xl font-black tracking-tight text-neutral-950 md:text-5xl">
-              Ready to start your journey?
+              Stay connected with the club
             </h2>
             <p className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-neutral-600 md:text-base">
-              Join thousands of students already learning, practicing, and excelling with Math Club.
+              Browse public updates, review achievements, and sign in when you need the full dashboard.
             </p>
             <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
               <Link href="/signup" className="mono-button px-8 py-4 text-base font-semibold">

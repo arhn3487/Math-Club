@@ -54,7 +54,7 @@ export async function GET(
 
     if (resultError) throw resultError
 
-    const isAdmin = user.user_type === 'admin'
+    const isAdmin = ['admin', 'superuser'].includes(user.user_type)
     if (!isAdmin && result.user_id !== user.user_id) {
       return NextResponse.json({ message: 'Forbidden' }, { status: 403 })
     }

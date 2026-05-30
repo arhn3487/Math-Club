@@ -190,7 +190,7 @@ export async function POST(request: NextRequest) {
       .eq('user_id', user.user_id)
       .single()
 
-    if (userError || userData?.user_type !== 'admin') {
+    if (userError || !['admin', 'superuser'].includes(userData?.user_type)) {
       return NextResponse.json({ message: 'Only admins can upload resources' }, { status: 403 })
     }
 

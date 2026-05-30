@@ -172,13 +172,13 @@ export default function LoginPage() {
             {/* Account Type Selection */}
             <div>
               <label className="mb-2 block text-sm font-semibold text-neutral-700">Account Type</label>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-3 gap-2">
                 <button
                   type="button"
                   onClick={() => {
                     setFormData(prev => ({ ...prev, user_type: 'student' }))
                   }}
-                  className={`mono-button px-3 py-3 text-sm font-semibold ${
+                  className={`mono-button px-2 py-3 text-xs font-semibold whitespace-nowrap ${
                     formData.user_type === 'student'
                       ? ''
                       : 'mono-button--light'
@@ -191,7 +191,7 @@ export default function LoginPage() {
                   onClick={() => {
                     setFormData(prev => ({ ...prev, user_type: 'admin' }))
                   }}
-                  className={`mono-button px-3 py-3 text-sm font-semibold ${
+                  className={`mono-button px-2 py-3 text-xs font-semibold whitespace-nowrap ${
                     formData.user_type === 'admin'
                       ? ''
                       : 'mono-button--light'
@@ -204,7 +204,7 @@ export default function LoginPage() {
                   onClick={() => {
                     setFormData(prev => ({ ...prev, user_type: 'superuser' }))
                   }}
-                  className={`mono-button px-3 py-3 text-sm font-semibold ${
+                  className={`mono-button px-2 py-3 text-xs font-semibold whitespace-nowrap ${
                     formData.user_type === 'superuser'
                       ? ''
                       : 'mono-button--light'

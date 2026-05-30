@@ -20,7 +20,7 @@ async function verifyAdminUserId(userId: string) {
     .eq('user_id', userId)
     .single()
 
-  if (error || data?.user_type !== 'admin') {
+  if (error || !['admin', 'superuser'].includes(data?.user_type)) {
     return false
   }
 

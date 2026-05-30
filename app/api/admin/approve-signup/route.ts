@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
     }
 
     const payload = verifyToken(token)
-    if (!payload || payload.user_type !== 'superuser') {
+    if (!payload || !['admin', 'superuser'].includes(payload.user_type)) {
       return NextResponse.json(
         { success: false, message: 'Admin access required' },
         { status: 403 }

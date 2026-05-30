@@ -23,7 +23,7 @@ export default function StudentClassRecordingsPage() {
     const token = localStorage.getItem('auth_token')
     const userType = localStorage.getItem('user_type')
 
-    if (!token || userType !== 'student') {
+    if (!token || (userType !== 'student' && userType !== 'superuser')) {
       router.push('/login')
       return
     }

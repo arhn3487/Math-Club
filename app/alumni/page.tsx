@@ -153,42 +153,55 @@ export default function AlumniPage() {
         {/* Members List */}
         <div className="space-y-3 w-full">
           {filteredMembers.length > 0 ? (
-            filteredMembers.map((member) => (
-              <div
-                key={member.id}
-                className="flex w-full flex-col gap-4 rounded-lg bg-white p-4 shadow transition hover:shadow-lg md:flex-row md:items-center md:gap-8 md:px-6"
-              >
-                <div className="flex items-center gap-4 md:flex-shrink-0 md:gap-6">
-                  {member.profile_image_url ? (
-                    <img
-                      src={member.profile_image_url}
-                      alt={member.full_name}
-                      className="h-14 w-14 flex-shrink-0 rounded-full object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-indigo-600 font-bold text-white">
-                      {member.full_name.charAt(0)}
-                    </div>
-                  )}
+            <>
+              {userType === 'student' && (
+                <div className="grid grid-cols-4 gap-4 mb-2 px-3 text-sm font-semibold text-gray-600">
+                  <div>Picture</div>
+                  <div>Name</div>
+                  <div>Email</div>
+                  <div className="text-right">Student ID</div>
                 </div>
+              )}
 
-                <div className="min-w-0 md:flex-1 md:text-center">
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500 md:hidden">Name</p>
-                  <h3 className="truncate text-sm font-normal text-gray-900 md:text-base">{member.full_name}</h3>
-                </div>
+              {filteredMembers.map((member) => (
+                <div
+                  key={member.id}
+                  className={`w-full rounded-lg bg-white p-4 shadow transition hover:shadow-lg ${userType === 'student' ? 'grid grid-cols-4 items-center gap-4' : 'flex flex-col gap-4 md:flex-row md:items-center md:gap-8 md:px-6'}`}
+                >
+                  {/* Picture */}
+                  <div className="flex items-center gap-4 md:flex-shrink-0 md:gap-6">
+                    {member.profile_image_url ? (
+                      <img
+                        src={member.profile_image_url}
+                        alt={member.full_name}
+                        className="h-14 w-14 flex-shrink-0 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-indigo-600 font-bold text-white">
+                        {member.full_name.charAt(0)}
+                      </div>
+                    )}
+                  </div>
 
-                <div className="min-w-0 md:flex-shrink-0 md:text-right">
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500 md:hidden">
-                    {member.user_type === 'admin' ? 'Admin ID' : 'Student ID'}
-                  </p>
-                  <p className="truncate text-sm text-gray-600 md:text-base md:whitespace-nowrap">
-                    {member.user_type === 'admin'
-                      ? `${member.admin_id || 'Not assigned'}`
-                      : `${member.student_id || 'Not assigned'}`}
-                  </p>
+                  {/* Name */}
+                  <div className="min-w-0 md:flex-1">
+                    <h3 className="truncate text-sm font-normal text-gray-900 md:text-base">{member.full_name}</h3>
+                  </div>
+
+                  {/* Email (show for students) */}
+                  <div className="min-w-0">
+                    <p className="truncate text-sm text-gray-600 md:text-base">{member.email || 'No email'}</p>
+                  </div>
+
+                  {/* ID */}
+                  <div className="min-w-0 md:flex-shrink-0 text-right">
+                    <p className="truncate text-sm text-gray-600 md:text-base md:whitespace-nowrap">
+                      {member.user_type === 'admin' ? `${member.admin_id || 'Not assigned'}` : `${member.student_id || 'Not assigned'}`}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            ))
+              ))}
+            </>
           ) : (
             <div className="bg-white rounded-lg shadow p-12 text-center">
               <div className="text-6xl mb-4">👥</div>

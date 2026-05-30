@@ -33,6 +33,7 @@ export default function StudentResourcesPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [userType, setUserType] = useState<string | null>(null)
 
   useEffect(() => {
     const token = localStorage.getItem('auth_token')
@@ -42,7 +43,7 @@ export default function StudentResourcesPage() {
       router.push('/login')
       return
     }
-
+    setUserType(userType)
     fetchResources()
     fetchFolders()
   }, [router])
@@ -108,9 +109,21 @@ export default function StudentResourcesPage() {
         }
       })
 
+      // Build list of GitHub/resource items but exclude any that are the same URL as a video
+      const videoUrlSet = new Set<string>()
+      videoItems.forEach((vi) => {
+        if (vi.resource_url) videoUrlSet.add(String(vi.resource_url).toLowerCase())
+        if (vi.youtube_url) videoUrlSet.add(String(vi.youtube_url).toLowerCase())
+      })
+
       const githubItems: Resource[] = (resourceData.resources || []).filter((r: any) => {
         const url = String(r.resource_url || '').toLowerCase()
         const type = String(r.resource_type || '').toLowerCase()
+        // exclude resources that are actually the same as a video entry
+        if (!url) return false
+        if (videoUrlSet.has(url)) return false
+        // exclude YouTube links that may have been added as generic resources
+        if (url.includes('youtube.com') || url.includes('youtu.be')) return false
         return url.includes('github.com') || type === 'github'
       }).map((r: any) => ({
         id: r.id,
@@ -167,7 +180,13 @@ export default function StudentResourcesPage() {
       if (!map[key]) map[key] = []
       map[key].push(item)
     })
-    return map
+
+    // Convert to sorted array of [folderName, items] and sort ascending by folder name
+    let entries = Object.entries(map)
+      .map(([k, v]) => [k, v.sort((a, b) => (a.title || '').localeCompare(b.title || ''))] as [string, Resource[]])
+      .sort((a, b) => a[0].localeCompare(b[0]))
+
+    return entries
   }, [filteredItems])
 
   if (loading) {
@@ -259,7 +278,7 @@ export default function StudentResourcesPage() {
           </div>
         ) : (
           <div className="space-y-8">
-            {Object.entries(groupedByFolder).map(([folderName, items]) => (
+            {groupedByFolder.map(([folderName, items]) => (
               <div key={folderName}>
                 <h4 className="text-lg font-semibold mb-4">{folderName}</h4>
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">

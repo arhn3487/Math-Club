@@ -2,6 +2,8 @@ import { getSupabaseAdmin } from '@/lib/supabaseClient'
 import { NextRequest, NextResponse } from 'next/server'
 import jwt from 'jsonwebtoken'
 
+export const dynamic = 'force-dynamic'
+
 async function verifyAdmin(token: string) {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key') as any

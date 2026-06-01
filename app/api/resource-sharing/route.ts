@@ -2,6 +2,8 @@ import { getSupabaseAdmin } from '@/lib/supabaseClient'
 import { NextRequest, NextResponse } from 'next/server'
 import jwt from 'jsonwebtoken'
 
+const ADMIN_ROLES = ['admin', 'superuser', 'superadmin', 'super_admin']
+
 async function verifyUser(token: string) {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key') as any
@@ -20,7 +22,7 @@ async function verifyAdminUserId(userId: string) {
     .eq('user_id', userId)
     .single()
 
-  if (error || !['admin', 'superuser'].includes(data?.user_type)) {
+  if (error || !ADMIN_ROLES.includes(data?.user_type)) {
     return false
   }
 
@@ -263,14 +265,71 @@ export async function DELETE(request: NextRequest) {
     }
 
     const supabase = getSupabaseAdmin()
+
+    const removeFolderIfEmpty = async (folderId: number | null | undefined) => {
+      if (!folderId) return
+
+      const [videoCount, sharedCount, resourceCount] = await Promise.all([
+        supabase.from('video_resources').select('id', { count: 'exact', head: true }).eq('folder_id', folderId),
+        supabase.from('shared_resources').select('id', { count: 'exact', head: true }).eq('folder_id', folderId),
+        supabase.from('resources').select('id', { count: 'exact', head: true }).eq('folder_id', folderId),
+      ])
+
+      const hasLinkedRows =
+        (videoCount.count ?? 0) > 0 ||
+        (sharedCount.count ?? 0) > 0 ||
+        (resourceCount.count ?? 0) > 0
+
+      if (hasLinkedRows) return
+
+      const { error: folderDeleteError } = await supabase.from('resource_folders').delete().eq('id', folderId)
+      if (folderDeleteError) throw folderDeleteError
+    }
+
     if (type === 'video') {
-      const { error } = await supabase.from('video_resources').update({ is_active: false }).eq('id', id)
+      const { data: existing, error: fetchError } = await supabase
+        .from('video_resources')
+        .select('id, folder_id')
+        .eq('id', id)
+        .single()
+
+      if (fetchError) throw fetchError
+      if (!existing) return NextResponse.json({ message: 'Not found' }, { status: 404 })
+
+      const { error: batchDeleteError } = await supabase
+        .from('video_resource_batches')
+        .delete()
+        .eq('video_resource_id', id)
+
+      if (batchDeleteError) throw batchDeleteError
+
+      const { error } = await supabase.from('video_resources').delete().eq('id', id)
       if (error) throw error
+
+      await removeFolderIfEmpty(existing.folder_id)
       return NextResponse.json({ success: true })
     }
 
-    const { error } = await supabase.from('shared_resources').update({ is_active: false }).eq('id', id)
+    const { data: existing, error: fetchError } = await supabase
+      .from('shared_resources')
+      .select('id, folder_id')
+      .eq('id', id)
+      .single()
+
+    if (fetchError) throw fetchError
+    if (!existing) return NextResponse.json({ message: 'Not found' }, { status: 404 })
+
+    const { error: batchDeleteError } = await supabase
+      .from('shared_resource_batches')
+      .delete()
+      .eq('shared_resource_id', id)
+
+    if (batchDeleteError) throw batchDeleteError
+
+    const { error } = await supabase.from('shared_resources').delete().eq('id', id)
     if (error) throw error
+
+    await removeFolderIfEmpty(existing.folder_id)
     return NextResponse.json({ success: true })
   } catch (err) {
     console.error('Error deleting resource:', err)

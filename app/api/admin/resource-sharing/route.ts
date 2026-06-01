@@ -2,10 +2,13 @@ import { getSupabaseAdmin } from '@/lib/supabaseClient'
 import { NextRequest, NextResponse } from 'next/server'
 import jwt from 'jsonwebtoken'
 
+const ADMIN_ROLES = ['admin', 'superuser', 'superadmin', 'super_admin']
+const SUPERUSER_ROLES = ['superuser', 'superadmin', 'super_admin']
+
 async function verifyAdmin(token: string) {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key') as any
-    if (!decoded || !['admin', 'superuser'].includes(decoded.user_type)) {
+    if (!decoded || !ADMIN_ROLES.includes(decoded.user_type)) {
       return null
     }
     return decoded
@@ -157,35 +160,77 @@ export async function DELETE(request: NextRequest) {
     if (!id || !type) return NextResponse.json({ message: 'Missing id or type' }, { status: 400 })
 
     const supabase = getSupabaseAdmin()
+    const isSuperuser = SUPERUSER_ROLES.includes(admin.user_type)
+
+    const removeFolderIfEmpty = async (folderId: number | null | undefined) => {
+      if (!folderId) return
+
+      const [videoCount, sharedCount, resourceCount] = await Promise.all([
+        supabase.from('video_resources').select('id', { count: 'exact', head: true }).eq('folder_id', folderId),
+        supabase.from('shared_resources').select('id', { count: 'exact', head: true }).eq('folder_id', folderId),
+        supabase.from('resources').select('id', { count: 'exact', head: true }).eq('folder_id', folderId),
+      ])
+
+      const hasLinkedRows =
+        (videoCount.count ?? 0) > 0 ||
+        (sharedCount.count ?? 0) > 0 ||
+        (resourceCount.count ?? 0) > 0
+
+      if (hasLinkedRows) return
+
+      const { error: folderDeleteError } = await supabase.from('resource_folders').delete().eq('id', folderId)
+      if (folderDeleteError) throw folderDeleteError
+    }
+
     // Enforce ownership: only the admin who added the resource can delete it
     if (type === 'video') {
       const { data: existing, error: fetchErr } = await supabase
         .from('video_resources')
-        .select('id, added_by')
+        .select('id, added_by, folder_id')
         .eq('id', id)
         .single()
       if (fetchErr) throw fetchErr
       if (!existing) return NextResponse.json({ message: 'Not found' }, { status: 404 })
-      if (existing.added_by !== admin.user_id) {
+      if (!isSuperuser && existing.added_by !== admin.user_id) {
         return NextResponse.json({ message: 'Forbidden: not the owner' }, { status: 403 })
       }
+
+      const { error: batchDeleteError } = await supabase
+        .from('video_resource_batches')
+        .delete()
+        .eq('video_resource_id', id)
+
+      if (batchDeleteError) throw batchDeleteError
+
       const { error } = await supabase.from('video_resources').delete().eq('id', id)
       if (error) throw error
+
+      await removeFolderIfEmpty(existing.folder_id)
       return NextResponse.json({ success: true })
     }
 
     const { data: existingShared, error: fetchSharedErr } = await supabase
       .from('shared_resources')
-      .select('id, added_by')
+      .select('id, added_by, folder_id')
       .eq('id', id)
       .single()
     if (fetchSharedErr) throw fetchSharedErr
     if (!existingShared) return NextResponse.json({ message: 'Not found' }, { status: 404 })
-    if (existingShared.added_by !== admin.user_id) {
+    if (!isSuperuser && existingShared.added_by !== admin.user_id) {
       return NextResponse.json({ message: 'Forbidden: not the owner' }, { status: 403 })
     }
+
+    const { error: batchDeleteError } = await supabase
+      .from('shared_resource_batches')
+      .delete()
+      .eq('shared_resource_id', id)
+
+    if (batchDeleteError) throw batchDeleteError
+
     const { error } = await supabase.from('shared_resources').delete().eq('id', id)
     if (error) throw error
+
+    await removeFolderIfEmpty(existingShared.folder_id)
     return NextResponse.json({ success: true })
   } catch (err) {
     console.error('Error deleting resource/video:', err)

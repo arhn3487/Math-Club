@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { verifyToken, extractTokenFromHeader } from '@/lib/auth'
 import { UserProfileDTO } from '@/types/dtos'
 
+export const dynamic = 'force-dynamic'
+
 interface VerifyResponseDTO {
   success: boolean
   message: string

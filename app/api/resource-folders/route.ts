@@ -38,7 +38,6 @@ export async function GET(request: NextRequest) {
     const { data, error } = await supabase
       .from('resource_folders')
       .select('*')
-      .eq('is_active', true)
       .order('created_at', { ascending: false })
 
     if (error) throw error
@@ -70,7 +69,6 @@ export async function POST(request: NextRequest) {
         folder_name: folder_name.trim(),
         description: description || null,
         created_by: admin.user_id,
-        is_active: true,
       }])
       .select()
       .single()
@@ -132,14 +130,26 @@ export async function DELETE(request: NextRequest) {
     }
 
     const supabase = getSupabaseAdmin()
-    
-    // Soft delete: set is_active to false instead of hard delete
-    const { data, error } = await supabase
-      .from('resource_folders')
-      .update({ is_active: false })
-      .eq('id', id)
-      .select()
-      .single()
+
+    const [videoCount, sharedCount, resourceCount] = await Promise.all([
+      supabase.from('video_resources').select('id', { count: 'exact', head: true }).eq('folder_id', id),
+      supabase.from('shared_resources').select('id', { count: 'exact', head: true }).eq('folder_id', id),
+      supabase.from('resources').select('id', { count: 'exact', head: true }).eq('folder_id', id),
+    ])
+
+    const hasLinkedRows =
+      (videoCount.count ?? 0) > 0 ||
+      (sharedCount.count ?? 0) > 0 ||
+      (resourceCount.count ?? 0) > 0
+
+    if (hasLinkedRows) {
+      return NextResponse.json(
+        { message: 'Folder still contains resources and cannot be deleted' },
+        { status: 409 }
+      )
+    }
+
+    const { data, error } = await supabase.from('resource_folders').delete().eq('id', id).select().single()
 
     if (error) throw error
     return NextResponse.json({ folder: data })

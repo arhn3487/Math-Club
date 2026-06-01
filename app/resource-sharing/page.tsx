@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 interface Resource {
@@ -21,6 +21,111 @@ interface Folder {
   id: number
   folder_name: string
   description?: string
+}
+
+function LazyPdfPreview({ url, title }: { url: string; title: string }) {
+  const containerRef = useRef<HTMLDivElement | null>(null)
+  const [shouldLoad, setShouldLoad] = useState(false)
+  const [loaded, setLoaded] = useState(false)
+  const canvasRef = useRef<HTMLCanvasElement | null>(null)
+
+  useEffect(() => {
+    if (!shouldLoad || !canvasRef.current) return
+
+    const loadPdfJsAndRender = async () => {
+      if (!(window as any).pdfjsLib) {
+        await new Promise<void>((resolve, reject) => {
+          const s = document.createElement('script')
+          s.src = 'https://unpkg.com/pdfjs-dist@3.7.107/build/pdf.min.js'
+          s.onload = () => resolve()
+          s.onerror = () => reject(new Error('Failed to load pdfjs'))
+          document.head.appendChild(s)
+        })
+      }
+
+      const pdfjsLib = (window as any).pdfjsLib
+      try {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist@3.7.107/build/pdf.worker.min.js'
+        // Try to fetch the PDF as an ArrayBuffer first (better CORS handling),
+        // then fall back to loading by URL.
+        let pdf
+        try {
+          const resp = await fetch(url, { mode: 'cors' })
+          if (!resp.ok) throw new Error('Fetch failed')
+          const data = await resp.arrayBuffer()
+          const loadingTask = pdfjsLib.getDocument({ data })
+          pdf = await loadingTask.promise
+        } catch (fetchErr) {
+          const loadingTask = pdfjsLib.getDocument({ url, withCredentials: false })
+          pdf = await loadingTask.promise
+        }
+
+        const page = await pdf.getPage(1)
+        const viewport = page.getViewport({ scale: 1.8 })
+        const sourceCanvas = document.createElement('canvas')
+        sourceCanvas.width = viewport.width
+        sourceCanvas.height = viewport.height
+        const sourceCtx = sourceCanvas.getContext('2d')!
+        await page.render({ canvasContext: sourceCtx, viewport }).promise
+
+        const canvas = canvasRef.current!
+        canvas.width = viewport.width
+        canvas.height = viewport.height * 0.42
+        const ctx = canvas.getContext('2d')!
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
+        ctx.drawImage(
+          sourceCanvas,
+          0,
+          0,
+          sourceCanvas.width,
+          sourceCanvas.height * 0.42,
+          0,
+          0,
+          canvas.width,
+          canvas.height
+        )
+        setLoaded(true)
+      } catch (err) {
+        console.error('PDF render failed', err)
+      }
+    }
+
+    void loadPdfJsAndRender()
+  }, [shouldLoad, url])
+
+  useEffect(() => {
+    const element = containerRef.current
+    if (!element) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          setShouldLoad(true)
+          observer.disconnect()
+        }
+      },
+      { rootMargin: '220px' }
+    )
+
+    observer.observe(element)
+    return () => observer.disconnect()
+  }, [])
+
+  return (
+    <div ref={containerRef} className="relative mb-3 h-44 w-full overflow-hidden rounded bg-gray-100">
+      {!shouldLoad && <div className="h-full w-full animate-pulse bg-gray-200" />}
+      {shouldLoad && (
+        <>
+          {!loaded && (
+            <div className="absolute inset-0 flex items-center justify-center bg-gray-100 text-xs text-gray-500">
+              Loading preview...
+            </div>
+          )}
+          <canvas ref={canvasRef} className="h-full w-full object-cover" />
+        </>
+      )}
+    </div>
+  )
 }
 
 export default function StudentResourcesPage() {
@@ -47,6 +152,71 @@ export default function StudentResourcesPage() {
     fetchResources()
     fetchFolders()
   }, [router])
+
+  const isLikelyPdfUrl = (url: string) => {
+    try {
+      const parsed = new URL(url)
+      return parsed.pathname.toLowerCase().endsWith('.pdf')
+    } catch {
+      return url.toLowerCase().includes('.pdf')
+    }
+  }
+
+  const getPdfPreviewUrl = (url: string) => {
+    try {
+      const parsed = new URL(url)
+
+      if (parsed.hostname.includes('github.com') && parsed.pathname.includes('/blob/')) {
+        const parts = parsed.pathname.split('/').filter(Boolean)
+        if (parts.length >= 5) {
+          const owner = parts[0]
+          const repo = parts[1]
+          const branch = parts[3]
+          const filePath = parts.slice(4).join('/')
+          return `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${filePath}`
+        }
+      }
+
+      return url
+    } catch {
+      return url
+    }
+  }
+
+  const getGithubPreview = (url: string) => {
+    try {
+      const parsed = new URL(url)
+      if (!parsed.hostname.includes('github.com')) return undefined
+
+      const parts = parsed.pathname.split('/').filter(Boolean)
+      if (parts.length < 2) return undefined
+
+      const owner = parts[0]
+      const repo = parts[1]
+      return `https://opengraph.githubassets.com/1/${owner}/${repo}`
+    } catch {
+      return undefined
+    }
+  }
+
+  const getDownloadUrl = (url: string) => {
+    try {
+      const parsed = new URL(url)
+
+      if (parsed.hostname.includes('github.com') && parsed.pathname.includes('/blob/')) {
+        return url.replace('/blob/', '/raw/')
+      }
+
+      if (parsed.hostname.includes('raw.githubusercontent.com')) {
+        parsed.searchParams.set('download', '1')
+        return parsed.toString()
+      }
+
+      return url
+    } catch {
+      return url
+    }
+  }
 
   const fetchResources = async () => {
     try {
@@ -134,6 +304,8 @@ export default function StudentResourcesPage() {
         folder_id: r.folder_id ?? null,
         folder_name: r.folder_name,
         created_at: r.created_at,
+        // If it's a PDF file on GitHub, don't set an OG thumbnail so the PDF renderer shows page 1
+        thumbnail_url: (r.resource_url && !isLikelyPdfUrl(String(r.resource_url))) ? getGithubPreview(String(r.resource_url)) : undefined,
       }))
 
       setVideos(videoItems)
@@ -286,23 +458,38 @@ export default function StudentResourcesPage() {
                     <div key={`${activeTab}-${item.id}`} className="bg-white rounded-lg shadow p-4 hover:shadow-lg transition">
                       {item.thumbnail_url ? (
                         <img src={item.thumbnail_url} alt={item.title} className="w-full h-44 object-cover rounded mb-3" />
+                      ) : activeTab === 'github' && item.resource_url && isLikelyPdfUrl(item.resource_url) ? (
+                        <LazyPdfPreview url={getPdfPreviewUrl(item.resource_url)} title={item.title} />
                       ) : (
                         <div className="w-full h-44 bg-gray-100 rounded mb-3 flex items-center justify-center text-gray-400">No preview</div>
                       )}
                       <h3 className="font-bold text-gray-900 mb-2 line-clamp-2">{item.title}</h3>
                       <p className="text-gray-600 text-sm mb-4 line-clamp-2">{item.description || 'No description'}</p>
-                      <a
-                        href={item.resource_url || '#'}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={`block w-full px-3 py-2 rounded text-center text-sm ${
-                          activeTab === 'videos'
-                            ? 'bg-red-600 hover:bg-red-700 text-white'
-                            : 'border border-indigo-600 text-indigo-600 hover:bg-indigo-50'
-                        }`}
-                      >
-                        {activeTab === 'videos' ? 'Watch' : 'Open Link'}
-                      </a>
+                      <div className="flex gap-2">
+                        <a
+                          href={item.resource_url || '#'}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={`px-3 py-2 rounded text-center text-sm ${
+                            activeTab === 'videos'
+                              ? 'w-full bg-red-600 hover:bg-red-700 text-white'
+                              : 'flex-1 border border-indigo-600 text-indigo-600 hover:bg-indigo-50'
+                          }`}
+                        >
+                          {activeTab === 'videos' ? 'Watch' : 'Open Link'}
+                        </a>
+                        {activeTab === 'github' && item.resource_url && (
+                          <a
+                            href={getDownloadUrl(item.resource_url)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            download
+                            className="rounded border border-emerald-600 px-3 py-2 text-center text-sm text-emerald-700 hover:bg-emerald-50"
+                          >
+                            Download PDF
+                          </a>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>

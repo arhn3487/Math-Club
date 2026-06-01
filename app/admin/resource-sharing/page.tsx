@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 interface VideoResource {
@@ -23,6 +23,112 @@ interface SharedResource extends VideoResource {
 interface Folder {
   id: number
   folder_name: string
+}
+
+function LazyPdfPreview({ url, title }: { url: string; title: string }) {
+  const containerRef = useRef<HTMLDivElement | null>(null)
+  const [shouldLoad, setShouldLoad] = useState(false)
+  const [loaded, setLoaded] = useState(false)
+  const canvasRef = useRef<HTMLCanvasElement | null>(null)
+
+  useEffect(() => {
+    if (!shouldLoad || !canvasRef.current) return
+
+    const loadPdfJsAndRender = async () => {
+      // Load pdfjs from CDN if not already present
+      if (!(window as any).pdfjsLib) {
+        await new Promise<void>((resolve, reject) => {
+          const s = document.createElement('script')
+          s.src = 'https://unpkg.com/pdfjs-dist@3.7.107/build/pdf.min.js'
+          s.onload = () => resolve()
+          s.onerror = () => reject(new Error('Failed to load pdfjs'))
+          document.head.appendChild(s)
+        })
+      }
+
+      const pdfjsLib = (window as any).pdfjsLib
+      try {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist@3.7.107/build/pdf.worker.min.js'
+        // Try to fetch the PDF as an ArrayBuffer first (better CORS handling),
+        // then fall back to loading by URL.
+        let pdf
+        try {
+          const resp = await fetch(url, { mode: 'cors' })
+          if (!resp.ok) throw new Error('Fetch failed')
+          const data = await resp.arrayBuffer()
+          const loadingTask = pdfjsLib.getDocument({ data })
+          pdf = await loadingTask.promise
+        } catch (fetchErr) {
+          const loadingTask = pdfjsLib.getDocument({ url, withCredentials: false })
+          pdf = await loadingTask.promise
+        }
+        
+        const page = await pdf.getPage(1)
+        const viewport = page.getViewport({ scale: 1.8 })
+        const sourceCanvas = document.createElement('canvas')
+        sourceCanvas.width = viewport.width
+        sourceCanvas.height = viewport.height
+        const sourceCtx = sourceCanvas.getContext('2d')!
+        await page.render({ canvasContext: sourceCtx, viewport }).promise
+
+        const canvas = canvasRef.current!
+        canvas.width = viewport.width
+        canvas.height = viewport.height * 0.42
+        const ctx = canvas.getContext('2d')!
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
+        ctx.drawImage(
+          sourceCanvas,
+          0,
+          0,
+          sourceCanvas.width,
+          sourceCanvas.height * 0.42,
+          0,
+          0,
+          canvas.width,
+          canvas.height
+        )
+        setLoaded(true)
+      } catch (err) {
+        console.error('PDF render failed', err)
+      }
+    }
+
+    void loadPdfJsAndRender()
+  }, [shouldLoad, url])
+
+  useEffect(() => {
+    const element = containerRef.current
+    if (!element) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          setShouldLoad(true)
+          observer.disconnect()
+        }
+      },
+      { rootMargin: '220px' }
+    )
+
+    observer.observe(element)
+    return () => observer.disconnect()
+  }, [])
+
+  return (
+    <div ref={containerRef} className="relative mb-3 h-40 w-full overflow-hidden rounded bg-gray-100">
+      {!shouldLoad && <div className="h-full w-full animate-pulse bg-gray-200" />}
+      {shouldLoad && (
+        <>
+          {!loaded && (
+            <div className="absolute inset-0 flex items-center justify-center bg-gray-100 text-xs text-gray-500">
+              Loading preview...
+            </div>
+          )}
+          <canvas ref={canvasRef} className="h-full w-full object-cover" />
+        </>
+      )}
+    </div>
+  )
 }
 
 export default function AdminResourceSharingPage() {
@@ -59,6 +165,71 @@ export default function AdminResourceSharingPage() {
     void fetchBatches()
     void fetchFolders()
   }, [router])
+
+  const getGithubPreview = (url: string) => {
+    try {
+      const parsed = new URL(url)
+      if (!parsed.hostname.includes('github.com')) return undefined
+
+      const parts = parsed.pathname.split('/').filter(Boolean)
+      if (parts.length < 2) return undefined
+
+      const owner = parts[0]
+      const repo = parts[1]
+      return `https://opengraph.githubassets.com/1/${owner}/${repo}`
+    } catch {
+      return undefined
+    }
+  }
+
+  const getDownloadUrl = (url: string) => {
+    try {
+      const parsed = new URL(url)
+
+      if (parsed.hostname.includes('github.com') && parsed.pathname.includes('/blob/')) {
+        return url.replace('/blob/', '/raw/')
+      }
+
+      if (parsed.hostname.includes('raw.githubusercontent.com')) {
+        parsed.searchParams.set('download', '1')
+        return parsed.toString()
+      }
+
+      return url
+    } catch {
+      return url
+    }
+  }
+
+  const isLikelyPdfUrl = (url: string) => {
+    try {
+      const parsed = new URL(url)
+      return parsed.pathname.toLowerCase().endsWith('.pdf')
+    } catch {
+      return url.toLowerCase().includes('.pdf')
+    }
+  }
+
+  const getPdfPreviewUrl = (url: string) => {
+    try {
+      const parsed = new URL(url)
+
+      if (parsed.hostname.includes('github.com') && parsed.pathname.includes('/blob/')) {
+        const parts = parsed.pathname.split('/').filter(Boolean)
+        if (parts.length >= 5) {
+          const owner = parts[0]
+          const repo = parts[1]
+          const branch = parts[3]
+          const filePath = parts.slice(4).join('/')
+          return `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${filePath}`
+        }
+      }
+
+      return url
+    } catch {
+      return url
+    }
+  }
 
   const fetchAll = async () => {
     try {
@@ -106,11 +277,17 @@ export default function AdminResourceSharingPage() {
           if (!item.resource_url) return false
           return String(item.resource_url).toLowerCase().includes('github.com') || String(item.resource_type || '').toLowerCase() === 'github'
         })
-        .map((item: any) => ({
-          ...item,
-          folder_name: item.resource_folders?.folder_name || null,
-          batch_year: item.shared_resource_batches?.[0]?.batch_year ?? null,
-        }))
+        .map((item: any) => {
+          const urlStr = String(item.resource_url || '')
+          const isPdf = isLikelyPdfUrl(urlStr)
+          return {
+            ...item,
+            folder_name: item.resource_folders?.folder_name || null,
+            batch_year: item.shared_resource_batches?.[0]?.batch_year ?? null,
+            // If it's a PDF file on GitHub, prefer rendering the PDF first-page preview
+            thumbnail_url: !isPdf && item.resource_url ? getGithubPreview(urlStr) : undefined,
+          }
+        })
 
       setVideos(mappedVideos)
       setGithubs(mappedGithubs)
@@ -426,6 +603,8 @@ export default function AdminResourceSharingPage() {
                     <div key={item.id} className="rounded-lg bg-white p-4 shadow">
                       {item.thumbnail_url ? (
                         <img src={item.thumbnail_url} alt={item.title} className="mb-3 h-40 w-full rounded object-cover" />
+                      ) : activeTab === 'github' && item.resource_url && isLikelyPdfUrl(item.resource_url) ? (
+                        <LazyPdfPreview url={getPdfPreviewUrl(item.resource_url)} title={item.title} />
                       ) : (
                         <div className="mb-3 flex h-40 w-full items-center justify-center rounded bg-gray-100 text-gray-400">
                           No preview
@@ -440,13 +619,24 @@ export default function AdminResourceSharingPage() {
                           href={item.resource_url}
                           target="_blank"
                           rel="noreferrer"
-                          className={`flex-1 rounded px-3 py-2 text-center ${activeTab === 'videos' ? 'bg-red-600 text-white' : 'border border-indigo-600 bg-white text-indigo-600'}`}
+                          className={`rounded px-3 py-2 text-center ${activeTab === 'videos' ? 'flex-1 bg-red-600 text-white' : 'flex-1 border border-indigo-600 bg-white text-indigo-600'}`}
                         >
                           Open
                         </a>
+                        {activeTab === 'github' && item.resource_url && (
+                          <a
+                            href={getDownloadUrl(item.resource_url)}
+                            target="_blank"
+                            rel="noreferrer"
+                            download
+                            className="rounded border border-emerald-600 px-3 py-2 text-emerald-700"
+                          >
+                            Download
+                          </a>
+                        )}
                         <button
                           onClick={() => handleDelete(item.id, activeTab === 'videos' ? 'video' : 'resource')}
-                          className="flex-1 rounded border border-red-600 px-3 py-2 text-red-600"
+                          className={`rounded border border-red-600 px-3 py-2 text-red-600 ${activeTab === 'videos' ? 'flex-1' : ''}`}
                         >
                           Delete
                         </button>

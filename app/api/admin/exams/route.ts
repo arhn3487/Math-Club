@@ -2,6 +2,9 @@ import { getSupabaseAdmin } from '@/lib/supabaseClient'
 import { NextRequest, NextResponse } from 'next/server'
 import jwt from 'jsonwebtoken'
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 async function verifyAdmin(token: string) {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key') as any
@@ -27,7 +30,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { exam_name, description, total_marks, duration_minutes, questions } = body
+    const { exam_name, description, total_marks, duration_minutes, start_time, questions } = body
 
     // Validate question marks do not exceed exam total_marks
     if (questions && Array.isArray(questions) && questions.length > 0) {
@@ -35,6 +38,16 @@ export async function POST(request: NextRequest) {
       if (sumMarks > Number(total_marks)) {
         return NextResponse.json({ message: 'Total question marks cannot exceed the exam total marks' }, { status: 400 })
       }
+    }
+
+    // A scheduled start time must be in the future, if provided
+    let normalizedStartTime: string | null = null
+    if (start_time) {
+      const parsed = new Date(start_time)
+      if (Number.isNaN(parsed.getTime())) {
+        return NextResponse.json({ message: 'Invalid start time' }, { status: 400 })
+      }
+      normalizedStartTime = parsed.toISOString()
     }
 
     const supabase = getSupabaseAdmin()
@@ -48,6 +61,7 @@ export async function POST(request: NextRequest) {
           description,
           total_marks,
           duration_minutes,
+          start_time: normalizedStartTime,
           created_by: admin.user_id,
           is_active: true,
         },

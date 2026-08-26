@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { AchievementCard } from '@/components/cards/FeatureCards'
-import { Achievement } from '@/types'
+import { Achievement, Leadership } from '@/types'
 
 export default function Home() {
   const router = useRouter()
@@ -12,12 +12,11 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true)
   const [achievements, setAchievements] = useState<Achievement[]>([])
   const [achievementsLoading, setAchievementsLoading] = useState(true)
+  const [currentPresident, setCurrentPresident] = useState<Leadership | null>(null)
 
   const navItems = [
-    //{ label: 'Batches', href: '/batches' },
-    //{ label: 'Courses', href: '/courses' },
-    //{ label: 'Contests', href: '/contests' },
-    //{ label: 'Achievements', href: '/achievements' },
+    { label: 'Achievements', href: '/achievements' },
+    { label: 'Leadership', href: '/leadership' },
     { label: 'Alumni', href: '/alumni' },
   ]
 
@@ -44,6 +43,22 @@ export default function Home() {
     }
 
     loadAchievements()
+  }, [])
+
+  useEffect(() => {
+    const loadLeadership = async () => {
+      try {
+        const response = await fetch('/api/leadership')
+        if (!response.ok) return
+        const data = await response.json()
+        const list: Leadership[] = Array.isArray(data) ? data : []
+        setCurrentPresident(list.find((member) => member.is_current) || null)
+      } catch {
+        // Non-critical for the homepage; the Leadership page still works.
+      }
+    }
+
+    loadLeadership()
   }, [])
 
   if (isLoading) {
@@ -155,6 +170,34 @@ export default function Home() {
         </div>
       </section>
 
+      {currentPresident && (
+        <section className="mono-section pt-0">
+          <div className="mono-container">
+            <Link
+              href="/leadership"
+              className="mono-surface mono-card-hover flex flex-col items-center gap-5 rounded-[2rem] p-6 text-center sm:flex-row sm:text-left"
+            >
+              {currentPresident.photo_url ? (
+                <img
+                  src={currentPresident.photo_url}
+                  alt={currentPresident.full_name}
+                  className="h-20 w-20 flex-shrink-0 rounded-full border border-neutral-200 object-cover"
+                />
+              ) : (
+                <div className="flex h-20 w-20 flex-shrink-0 items-center justify-center rounded-full border border-neutral-200 bg-neutral-100 text-2xl font-black text-neutral-400">
+                  {currentPresident.full_name.charAt(0).toUpperCase()}
+                </div>
+              )}
+              <div>
+                <span className="mono-badge">Club {currentPresident.position}</span>
+                <h2 className="mt-2 text-2xl font-black tracking-tight text-neutral-950">{currentPresident.full_name}</h2>
+                <p className="mt-1 text-sm text-neutral-600">See past and present club leadership &rarr;</p>
+              </div>
+            </Link>
+          </div>
+        </section>
+      )}
+
       <section className="mono-section bg-neutral-50/70">
         <div className="mono-container">
           <div className="mb-8 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
@@ -226,15 +269,16 @@ export default function Home() {
             <div>
               <h3 className="text-sm font-semibold uppercase tracking-[0.22em] text-neutral-500">Explore</h3>
               <ul className="mt-4 space-y-2 text-sm text-neutral-600">
-                <li><Link href="/courses" className="transition-colors hover:text-neutral-950">Courses</Link></li>
-                <li><Link href="/contests" className="transition-colors hover:text-neutral-950">Contests</Link></li>
+                <li><Link href="/achievements" className="transition-colors hover:text-neutral-950">Achievements</Link></li>
+                <li><Link href="/leadership" className="transition-colors hover:text-neutral-950">Leadership</Link></li>
+                <li><Link href="/alumni" className="transition-colors hover:text-neutral-950">Alumni</Link></li>
               </ul>
             </div>
             <div>
               <h3 className="text-sm font-semibold uppercase tracking-[0.22em] text-neutral-500">Support</h3>
               <ul className="mt-4 space-y-2 text-sm text-neutral-600">
-                <li><a href="#" className="transition-colors hover:text-neutral-950">Contact Us</a></li>
-                <li><a href="#" className="transition-colors hover:text-neutral-950">FAQ</a></li>
+                <li><a href="mailto:info@mathclub.com" className="transition-colors hover:text-neutral-950">Contact Us</a></li>
+                <li><Link href="/signup" className="transition-colors hover:text-neutral-950">How to Join</Link></li>
               </ul>
             </div>
           </div>

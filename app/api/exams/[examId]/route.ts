@@ -2,6 +2,9 @@ import { getSupabaseAdmin } from '@/lib/supabaseClient'
 import { NextRequest, NextResponse } from 'next/server'
 import jwt from 'jsonwebtoken'
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 async function verifyStudent(token: string) {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key') as any
@@ -60,6 +63,17 @@ export async function GET(
       .single()
 
     if (examError) throw examError
+
+    // Block access until the exam's scheduled start time (teacher-set timer).
+    if (exam.start_time && new Date(exam.start_time).getTime() > Date.now()) {
+      return NextResponse.json(
+        {
+          message: `This exam has not started yet. It opens at ${new Date(exam.start_time).toLocaleString()}.`,
+          startTime: exam.start_time,
+        },
+        { status: 423 }
+      )
+    }
 
     // Get questions (shuffled)
     const { data: questions, error: questionsError } = await supabase

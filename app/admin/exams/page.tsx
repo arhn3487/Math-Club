@@ -10,6 +10,7 @@ interface Exam {
   description: string
   total_marks: number
   duration_minutes: number
+  start_time: string | null
   created_by: string
   is_active: boolean
   created_at: string
@@ -36,6 +37,7 @@ export default function AdminExamsPage() {
     description: '',
     total_marks: 100,
     duration_minutes: 60,
+    start_time: '',
   })
   const [questions, setQuestions] = useState<Question[]>([
     {
@@ -71,6 +73,7 @@ export default function AdminExamsPage() {
     try {
       setLoading(true)
       const response = await fetch('/api/admin/exams', {
+        cache: 'no-store',
         headers: {
           Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
         },
@@ -144,6 +147,10 @@ export default function AdminExamsPage() {
 
     try {
       setSubmitting(true)
+      // datetime-local has no timezone info; convert using the browser's local
+      // timezone so the stored start time matches what the teacher picked.
+      const start_time = formData.start_time ? new Date(formData.start_time).toISOString() : null
+
       const response = await fetch('/api/admin/exams', {
         method: 'POST',
         headers: {
@@ -152,6 +159,7 @@ export default function AdminExamsPage() {
         },
         body: JSON.stringify({
           ...formData,
+          start_time,
           questions,
         }),
       })
@@ -167,6 +175,7 @@ export default function AdminExamsPage() {
         description: '',
         total_marks: 100,
         duration_minutes: 60,
+        start_time: '',
       })
       setQuestions([
         {
@@ -292,6 +301,20 @@ export default function AdminExamsPage() {
                     className="w-full rounded-xl border border-neutral-300 bg-white px-4 py-3 text-neutral-900 outline-none transition focus:border-neutral-900 focus:ring-2 focus:ring-neutral-900/10"
                     required
                   />
+                </div>
+                <div>
+                  <label className="mb-2 block text-sm font-semibold text-neutral-700">Starts At (optional)</label>
+                  <input
+                    type="datetime-local"
+                    name="start_time"
+                    value={formData.start_time}
+                    onChange={handleFormChange}
+                    className="w-full rounded-xl border border-neutral-300 bg-white px-4 py-3 text-neutral-900 outline-none transition focus:border-neutral-900 focus:ring-2 focus:ring-neutral-900/10"
+                  />
+                  <p className="mt-1 text-xs text-neutral-500">
+                    Leave blank to make the exam available immediately. Otherwise the exam stays locked and only
+                    unlocks for students automatically at this exact time.
+                  </p>
                 </div>
               </div>
 
@@ -443,12 +466,27 @@ export default function AdminExamsPage() {
                   </div>
                   <span
                     className={`rounded-full border px-3 py-1 text-xs font-semibold ${
-                      exam.is_active ? 'border-neutral-300 bg-neutral-50 text-neutral-800' : 'border-neutral-200 bg-white text-neutral-500'
+                      exam.start_time && new Date(exam.start_time).getTime() > Date.now()
+                        ? 'border-amber-300 bg-amber-50 text-amber-800'
+                        : exam.is_active
+                          ? 'border-neutral-300 bg-neutral-50 text-neutral-800'
+                          : 'border-neutral-200 bg-white text-neutral-500'
                     }`}
                   >
-                    {exam.is_active ? 'Active' : 'Inactive'}
+                    {exam.start_time && new Date(exam.start_time).getTime() > Date.now()
+                      ? 'Scheduled'
+                      : exam.is_active
+                        ? 'Active'
+                        : 'Inactive'}
                   </span>
                 </div>
+
+                {exam.start_time && (
+                  <p className="mb-4 text-sm text-neutral-600">
+                    {new Date(exam.start_time).getTime() > Date.now() ? 'Opens for students at ' : 'Opened for students at '}
+                    <span className="font-semibold text-neutral-900">{new Date(exam.start_time).toLocaleString()}</span>
+                  </p>
+                )}
 
                 <div className="grid md:grid-cols-4 gap-4 mb-4 text-sm">
                   <div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-3">

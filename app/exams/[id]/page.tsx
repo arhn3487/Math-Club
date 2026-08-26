@@ -82,6 +82,12 @@ export default function TakeExamPage() {
         return
       }
 
+      if (response.status === 423) {
+        const data = await response.json()
+        setError(data.message || 'This exam has not started yet.')
+        return
+      }
+
       if (!response.ok) {
         throw new Error('Failed to fetch exam')
       }
@@ -200,8 +206,8 @@ export default function TakeExamPage() {
 
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-600 mb-4">Exam not found</p>
+        <div className="text-center max-w-md px-4">
+          <p className="text-red-600 mb-4">{error || 'Exam not found'}</p>
           <Link href="/exams">
             <button className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
               Back to Exams

@@ -13,6 +13,7 @@ const adminLinks = [
 
 const superuserLinks = [
   { label: 'Achievements', href: '/superuser/achievements', icon: '★' },
+  { label: 'Leadership', href: '/superuser/leadership', icon: '♛' },
 ]
 
 export function AdminNavigation() {

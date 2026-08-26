@@ -11,6 +11,20 @@ interface Exam {
   total_marks: number
   duration_minutes: number
   is_active: boolean
+  start_time: string | null
+}
+
+function formatCountdown(ms: number) {
+  const totalSeconds = Math.max(0, Math.floor(ms / 1000))
+  const days = Math.floor(totalSeconds / 86400)
+  const hours = Math.floor((totalSeconds % 86400) / 3600)
+  const minutes = Math.floor((totalSeconds % 3600) / 60)
+  const seconds = totalSeconds % 60
+
+  if (days > 0) {
+    return `${days}d ${String(hours).padStart(2, '0')}h ${String(minutes).padStart(2, '0')}m`
+  }
+  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
 }
 
 interface ExamResult {
@@ -30,6 +44,7 @@ export default function ExamsPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [activeTab, setActiveTab] = useState<'available' | 'results'>('available')
+  const [now, setNow] = useState(() => Date.now())
   const completedResultsByExamId = new Map(results.map((result) => [result.exam_id, result]))
 
   useEffect(() => {
@@ -44,16 +59,28 @@ export default function ExamsPage() {
     fetchExamsAndResults()
   }, [router])
 
+  // Tick every second so a "Starts in ..." exam automatically flips to
+  // "Start Exam" the moment the teacher's scheduled time arrives, with no
+  // page reload needed.
+  useEffect(() => {
+    const hasUpcoming = exams.some((exam) => exam.start_time && new Date(exam.start_time).getTime() > now)
+    if (!hasUpcoming) return
+    const interval = setInterval(() => setNow(Date.now()), 1000)
+    return () => clearInterval(interval)
+  }, [exams, now])
+
   const fetchExamsAndResults = async () => {
     try {
       setLoading(true)
       const [examsRes, resultsRes] = await Promise.all([
         fetch('/api/exams', {
+          cache: 'no-store',
           headers: {
             Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
           },
         }),
         fetch('/api/exams/results', {
+          cache: 'no-store',
           headers: {
             Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
           },
@@ -125,9 +152,14 @@ export default function ExamsPage() {
         {activeTab === 'available' && (
           <div className="grid gap-6">
             {exams.length > 0 ? (
-              exams.map((exam) => (
+              exams.map((exam) => {
+                const startsAt = exam.start_time ? new Date(exam.start_time).getTime() : null
+                const isLocked = startsAt !== null && startsAt > now
+                const isCompleted = completedResultsByExamId.has(exam.id)
+
+                return (
                 <div key={exam.id} className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition">
-                  {completedResultsByExamId.has(exam.id) && (
+                  {isCompleted && (
                     <div className="mb-4 inline-flex rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-800">
                       Completed
                     </div>
@@ -139,10 +171,14 @@ export default function ExamsPage() {
                     </div>
                     <span
                       className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap ml-4 ${
-                        exam.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                        isLocked
+                          ? 'bg-amber-100 text-amber-800'
+                          : exam.is_active
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-gray-100 text-gray-800'
                       }`}
                     >
-                      {exam.is_active ? 'Active' : 'Inactive'}
+                      {isLocked ? 'Scheduled' : exam.is_active ? 'Active' : 'Inactive'}
                     </span>
                   </div>
 
@@ -161,12 +197,27 @@ export default function ExamsPage() {
                     </div>
                   </div>
 
-                    {completedResultsByExamId.has(exam.id) ? (
+                  {isLocked && startsAt !== null && (
+                    <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-center">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-amber-700">Starts in</p>
+                      <p className="text-2xl font-bold tabular-nums text-amber-800">{formatCountdown(startsAt - now)}</p>
+                      <p className="mt-1 text-xs text-amber-700">Opens automatically at {new Date(startsAt).toLocaleString()}</p>
+                    </div>
+                  )}
+
+                    {isCompleted ? (
                       <Link href={`/exams/results/${completedResultsByExamId.get(exam.id)?.id}`}>
                         <button className="w-full px-6 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 font-medium">
                           View Paper
                         </button>
                       </Link>
+                    ) : isLocked ? (
+                      <button
+                        disabled
+                        className="w-full px-6 py-2 bg-gray-200 text-gray-500 rounded-lg font-medium cursor-not-allowed"
+                      >
+                        Locked until start time
+                      </button>
                     ) : (
                       <Link href={`/exams/${exam.id}`}>
                         <button className="w-full px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium">
@@ -175,7 +226,8 @@ export default function ExamsPage() {
                       </Link>
                     )}
                 </div>
-              ))
+                )
+              })
             ) : (
               <div className="bg-white rounded-lg shadow p-12 text-center">
                 <div className="text-6xl mb-4">📝</div>

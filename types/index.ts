@@ -185,6 +185,24 @@ export interface FeaturedAchievement {
   achievement_id: string
 }
 
+// Club Leadership Types (past & present presidents / committee members)
+export interface Leadership {
+  id: string
+  full_name: string
+  position: string
+  photo_url?: string | null
+  batch_year?: number | null
+  term_start?: number | null
+  term_end?: number | null
+  is_current: boolean
+  bio?: string | null
+  display_order?: number | null
+  created_by: string
+  is_active: boolean
+  created_at: string
+  updated_at: string
+}
+
 // Alumni Types
 export interface AlumniBatch {
   id: string
